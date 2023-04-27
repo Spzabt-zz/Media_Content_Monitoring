@@ -29,6 +29,8 @@ dependencies {
 
 	implementation group: 'com.google.apis', name: 'google-api-services-youtube', version: 'v3-rev222-1.25.0'
 	implementation group: 'org.twitter4j', name: 'twitter4j-core', version: '4.1.2'
+	implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.11.0'
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
 
 	implementation 'org.springframework.boot:spring-boot-starter'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

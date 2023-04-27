@@ -26,6 +26,8 @@ public class TwitterService {
     }
 
     public void collectDataForModel(String[] keys) {
+        SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(3L);
+
         for (String key : keys) {
             try {
                 Query query = Query.of(key)
@@ -41,7 +43,7 @@ public class TwitterService {
                     System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText() + ":"
                             + status.getCreatedAt());
 
-                    saveTweetsInDb(status, keys);
+                    saveTweetsInDb(status, keys, socialMediaPlatform);
                 }
             } catch (Exception e) {
                 System.err.println("Error occurred while searching tweets: " + e.getMessage());
@@ -49,7 +51,7 @@ public class TwitterService {
         }
     }
 
-    private void saveTweetsInDb(Status status, String[] keywords) {
+    private void saveTweetsInDb(Status status, String[] keywords, SocialMediaPlatform socialMediaPlatform) {
         if (status.getLang().equals("en")) {
             List<String> present = new ArrayList<>();
             System.out.println("\n\n############################################");
@@ -90,7 +92,7 @@ public class TwitterService {
                 Instant instant = zonedDateTime.toInstant();
                 Date tweetedAtDate = Date.from(instant);
 
-                SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(3L);
+
 
                 TwitterData twitterData = new TwitterData(
                         id,

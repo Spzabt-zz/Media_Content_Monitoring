@@ -19,11 +19,13 @@ public class YTService {
     private final YTApi ytApi;
     private final YTDataRepo ytDataRepo;
     private String nextPage_token;
+    private final SocialMediaPlatform socialMediaPlatform;
 
     @Autowired
     public YTService(YTDataRepo ytDataRepo) {
         this.ytDataRepo = ytDataRepo;
         ytApi = new YTApi();
+        socialMediaPlatform = new SocialMediaPlatform(2L);
     }
 
     public void getVideoData(String[] keys) throws IOException {
@@ -165,7 +167,7 @@ public class YTService {
 
                     DateTime publishedAt = commentThread.getSnippet().getTopLevelComment().getSnippet().getPublishedAt();
 
-                    SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(2L);
+
                     YTData ytData = new YTData(comId, videoId, textDisplay, likeCount, videoTitle, publishedAt.toString(), Integer.valueOf(categoryId), viewCount, subscriberCount, hours, minutes, seconds, socialMediaPlatform);
                     ytDataRepo.save(ytData);
                 }

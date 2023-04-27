@@ -1,5 +1,6 @@
 package cdu.diploma.mediamonitoring.controller;
 
+import cdu.diploma.mediamonitoring.service.RedditService;
 import cdu.diploma.mediamonitoring.service.TwitterService;
 import cdu.diploma.mediamonitoring.service.YTService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,17 +11,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/dashboard")
 public class SocialMediaController {
     private final YTService ytService;
     private final TwitterService twitterService;
+    private final RedditService redditService;
 
     @Autowired
-    public SocialMediaController(YTService ytService, TwitterService twitterService) {
+    public SocialMediaController(YTService ytService, TwitterService twitterService, RedditService redditService) {
         this.ytService = ytService;
         this.twitterService = twitterService;
+        this.redditService = redditService;
     }
 
     @RequestMapping("/get-yt-data")
@@ -35,5 +39,11 @@ public class SocialMediaController {
         twitterService.collectDataForModel(keys);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping("/get-rd-data")
+    public List<String> getRedditData(@RequestBody String[] keys) throws Exception {
+
+        return redditService.searchReddit(keys);
     }
 }
