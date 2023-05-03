@@ -5,6 +5,7 @@ import cdu.diploma.mediamonitoring.model.RedditData;
 import cdu.diploma.mediamonitoring.model.SocialMediaPlatform;
 import cdu.diploma.mediamonitoring.repo.RedditDataRepo;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.api.client.util.DateTime;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -39,16 +40,17 @@ public class RedditService {
         HttpClient client = HttpClient.newBuilder().build();
         SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(1L);
 
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, 2023);
+        cal.set(Calendar.MONTH, Calendar.APRIL);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        Date myDate = cal.getTime();
+
         List<String> permalinkList = new ArrayList<>();
         for (String keyword : keywords) {
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.MONTH, -1);
-            long epochTimeFromDate = cal.getTimeInMillis() / 1000L;
-
             String encodedKeyword = URLEncoder.encode(keyword, "UTF-8");
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://oauth.reddit.com/r/all/search.json?q=" + encodedKeyword
-                            + "&after=" + epochTimeFromDate))
+                    .uri(URI.create("https://oauth.reddit.com/r/all/search.json?q=" + encodedKeyword))
                     .header("User-Agent", USER_AGENT)
                     .header("Authorization", "bearer " + accessToken)
                     .build();
@@ -69,6 +71,10 @@ public class RedditService {
 
                 long timestamp = Long.parseLong(post.get("created").getAsString().split("\\.")[0]);
                 Date subDate = new Date(timestamp * 1000L);
+
+                if (subDate.before(myDate)) {
+                    continue;
+                }
 
                 String siteSubRedditName = post.get("subreddit").getAsString();
 

@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -15,6 +16,10 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
+    private String keywords;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "social_media_platform_id")
@@ -24,6 +29,17 @@ public class Project {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "project", orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Keyword> keywords;
+    public Project(String name, String keywords, SocialMediaPlatform socialMediaPlatform, User user) {
+        this.name = name;
+        this.keywords = keywords;
+        this.socialMediaPlatform = socialMediaPlatform;
+        this.user = user;
+    }
+
+    public Project() {
+
+    }
+
+    /*@OneToMany(mappedBy = "project", orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Keyword> keywords;*/
 }

@@ -1,3 +1,4 @@
+/*
 package cdu.diploma.mediamonitoring.model;
 
 import lombok.Data;
@@ -16,6 +17,7 @@ public class Keyword {
     private String keywords;
 
     @ManyToOne
-    @JoinColumn(name = "keyword_id")
+    @JoinColumn(name = "project_id")
     private Project project;
 }
+*/
