@@ -17,7 +17,7 @@ public class SocialMediaPlatform {
 
     private String platformName;
 
-    @OneToOne(mappedBy = "socialMediaPlatform", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "socialMediaPlatform", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Project project;
 
     @OneToMany(mappedBy = "socialMediaPlatform", orphanRemoval = true, fetch = FetchType.LAZY)

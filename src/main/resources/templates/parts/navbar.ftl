@@ -28,6 +28,9 @@
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="/user/profile">Profile</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/panel">Projects</a>
+                    </li>
                 </#if>
             </ul>
 

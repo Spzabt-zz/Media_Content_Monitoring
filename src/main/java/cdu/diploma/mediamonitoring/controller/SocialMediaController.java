@@ -1,5 +1,6 @@
 package cdu.diploma.mediamonitoring.controller;
 
+import cdu.diploma.mediamonitoring.model.SocialMediaPlatform;
 import cdu.diploma.mediamonitoring.service.RedditService;
 import cdu.diploma.mediamonitoring.service.TwitterService;
 import cdu.diploma.mediamonitoring.service.YTService;
@@ -29,14 +30,14 @@ public class SocialMediaController {
 
     @RequestMapping("/get-yt-data")
     public ResponseEntity getVideoData(@RequestBody String[] keys) throws IOException {
-        ytService.getVideoData(keys);
+        ytService.getVideoData(keys, new SocialMediaPlatform());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping("/get-tw-data")
     public ResponseEntity getTwitterData(@RequestBody String[] keys) throws IOException {
-        twitterService.collectDataForModel(keys);
+        twitterService.collectDataForModel(keys, new SocialMediaPlatform());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -44,6 +45,6 @@ public class SocialMediaController {
     @RequestMapping("/get-rd-data")
     public List<String> getRedditData(@RequestBody String[] keys) throws Exception {
 
-        return redditService.searchReddit(keys);
+        return redditService.searchReddit(keys, new SocialMediaPlatform());
     }
 }

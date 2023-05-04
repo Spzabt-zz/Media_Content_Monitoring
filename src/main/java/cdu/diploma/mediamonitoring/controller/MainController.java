@@ -2,7 +2,9 @@ package cdu.diploma.mediamonitoring.controller;
 
 
 import cdu.diploma.mediamonitoring.external.api.Pipeline;
+import cdu.diploma.mediamonitoring.model.Project;
 import cdu.diploma.mediamonitoring.model.User;
+import cdu.diploma.mediamonitoring.repo.ProjectRepo;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.CoreSentence;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -11,10 +13,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 public class MainController {
+    private final ProjectRepo projectRepo;
+
+    public MainController(ProjectRepo projectRepo) {
+        this.projectRepo = projectRepo;
+    }
 
     @GetMapping("/")
     public String greeting(@AuthenticationPrincipal User user, Model model) {
@@ -29,7 +37,11 @@ public class MainController {
     }
 
     @GetMapping("/panel")
-    public String panel() {
+    public String panel(@AuthenticationPrincipal User user, Model model) {
+        ArrayList<Project> projects = (ArrayList<Project>) projectRepo.findAllByUser(user);
+
+        model.addAttribute("projects", projects);
+
         return "panel";
     }
 

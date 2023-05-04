@@ -1,6 +1,7 @@
 package cdu.diploma.mediamonitoring.service;
 
 import cdu.diploma.mediamonitoring.external.api.TwitterApi;
+import cdu.diploma.mediamonitoring.model.PlatformName;
 import cdu.diploma.mediamonitoring.model.SocialMediaPlatform;
 import cdu.diploma.mediamonitoring.model.TwitterData;
 import cdu.diploma.mediamonitoring.repo.TwitterDataRepo;
@@ -25,8 +26,8 @@ public class TwitterService {
         twitterApi = new TwitterApi();
     }
 
-    public void collectDataForModel(String[] keys) {
-        SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(3L);
+    public void collectDataForModel(String[] keys, SocialMediaPlatform socialMediaPlatform) {
+        //SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(3L);
 
         for (String key : keys) {
             try {
@@ -92,20 +93,33 @@ public class TwitterService {
                 Instant instant = zonedDateTime.toInstant();
                 Date tweetedAtDate = Date.from(instant);
 
+//                TwitterData twitterData = new TwitterData(
+//                        id,
+//                        link,
+//                        tweetText,
+//                        username,
+//                        followerCount,
+//                        friendCount,
+//                        listedCount,
+//                        verificationStatus,
+//                        tweetedAtDate,
+//                        socialMediaPlatform
+//                );
 
+                TwitterData twitterData = new TwitterData();
+                twitterData.setTwId(id);
+                twitterData.setLink(link);
+                twitterData.setTweet(tweetText);
+                twitterData.setUsername(username);
+                twitterData.setFollowerCount(followerCount);
+                twitterData.setFriendCount(friendCount);
+                twitterData.setListedCount(listedCount);
+                twitterData.setVerificationStatus(verificationStatus);
+                twitterData.setTweetedAt(tweetedAtDate);
 
-                TwitterData twitterData = new TwitterData(
-                        id,
-                        link,
-                        tweetText,
-                        username,
-                        followerCount,
-                        friendCount,
-                        listedCount,
-                        verificationStatus,
-                        tweetedAtDate,
-                        socialMediaPlatform
-                );
+                socialMediaPlatform.setPlatformName(PlatformName.TWITTER.name());
+                twitterData.setSocialMediaPlatform(socialMediaPlatform);
+
                 twitterDataRepo.save(twitterData);
             }
         }

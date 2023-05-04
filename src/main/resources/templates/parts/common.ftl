@@ -11,6 +11,9 @@
         <link rel="stylesheet" href="/static/css/sidebar.css"/>
         <link rel="stylesheet" href="/static/css/greeting.css"/>
         <link rel="stylesheet" href="/static/css/Auth.css"/>
+
+        <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+
         <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
         <script src="https://kit.fontawesome.com/fe369707df.js" crossorigin="anonymous"></script>
         <script type="text/javascript" src="https://unpkg.com/react/umd/react.production.min.js"></script>
@@ -32,8 +35,11 @@
         <#nested>
     </div>
 
-    <script src="/static/js/react-select.min.js"></script>
+    <script src="https://unpkg.com/@yaireo/tagify"></script>
+    <script src="https://unpkg.com/@yaireo/tagify@3.1.0/dist/tagify.polyfills.min.js"></script>
+
     <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/keyword.js"></script>
     <script src="/static/js/jquery-3.6.1.slim.min.js"></script>
     <script src="/static/js/popper.min.js"></script>
     </body>

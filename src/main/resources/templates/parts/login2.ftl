@@ -1,5 +1,3 @@
-<#import "/static/js/react-select.min.js" as reactSelect>
-
 <#macro login path isRegisterForm>
     <div class="form-div">
         <div class="wave"><img src="/static/img/assets/wave.png" style="width: 1550px; height: 710px;"></div>
@@ -56,18 +54,6 @@
                                     </#if>
                                 </div>
 
-                                <div class="form-input mt-5">
-                                    <input class="form-in ml-4" type="text" data-testid="brand"
-                                           placeholder="Enter Brand Name" name="brand"/>
-                                </div>
-                                <div class="form-input mt-5" data-testid="keywords">
-<#--                                    <select>-->
-<#--                                        &lt;#&ndash;                                    <#list keywords as keyword>&ndash;&gt;-->
-<#--                                        &lt;#&ndash;                                        <option value="${keyword}">${keyword}</option>&ndash;&gt;-->
-<#--                                        <option value="keyword">KEYWORD</option>-->
-<#--                                        &lt;#&ndash;                                    </#list>&ndash;&gt;-->
-<#--                                    </select>-->
-                                </div>
                                 <div class="form-input mt-5">
                                     <input class="form-in ml-4 ${(emailError??)?string('is-invalid', '')}" type="email"
                                            placeholder="some@some.com" name="email"

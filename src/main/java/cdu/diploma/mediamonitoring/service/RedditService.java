@@ -1,11 +1,11 @@
 package cdu.diploma.mediamonitoring.service;
 
 import cdu.diploma.mediamonitoring.external.api.RedditApi;
+import cdu.diploma.mediamonitoring.model.PlatformName;
 import cdu.diploma.mediamonitoring.model.RedditData;
 import cdu.diploma.mediamonitoring.model.SocialMediaPlatform;
 import cdu.diploma.mediamonitoring.repo.RedditDataRepo;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.api.client.util.DateTime;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -34,11 +34,11 @@ public class RedditService {
         redditApi = new RedditApi();
     }
 
-    public List<String> searchReddit(String[] keywords) throws Exception {
+    public List<String> searchReddit(String[] keywords, SocialMediaPlatform socialMediaPlatform) throws Exception {
         String accessToken = redditApi.getAccessToken();
 
         HttpClient client = HttpClient.newBuilder().build();
-        SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(1L);
+        //SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(1L);
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, 2023);
@@ -78,7 +78,17 @@ public class RedditService {
 
                 String siteSubRedditName = post.get("subreddit").getAsString();
 
-                RedditData redditData = new RedditData(subId, subTitle, subBody, subDate, permalink, siteSubRedditName, socialMediaPlatform);
+                //RedditData redditData = new RedditData(subId, subTitle, subBody, subDate, permalink, siteSubRedditName, socialMediaPlatform);
+                RedditData redditData = new RedditData();
+                redditData.setSubId(subId);
+                redditData.setSubTitle(subTitle);
+                redditData.setSubBody(subBody);
+                redditData.setSubDate(subDate);
+                redditData.setSubUrl(permalink);
+                redditData.setSite(siteSubRedditName);
+
+                socialMediaPlatform.setPlatformName(PlatformName.REDDIT.name());
+                redditData.setSocialMediaPlatform(socialMediaPlatform);
 
                 redditDataRepo.save(redditData);
 

@@ -1,6 +1,7 @@
 package cdu.diploma.mediamonitoring.service;
 
 import cdu.diploma.mediamonitoring.external.api.YTApi;
+import cdu.diploma.mediamonitoring.model.PlatformName;
 import cdu.diploma.mediamonitoring.model.SocialMediaPlatform;
 import cdu.diploma.mediamonitoring.model.YTData;
 import cdu.diploma.mediamonitoring.repo.YTDataRepo;
@@ -19,16 +20,16 @@ public class YTService {
     private final YTApi ytApi;
     private final YTDataRepo ytDataRepo;
     private String nextPage_token;
-    private final SocialMediaPlatform socialMediaPlatform;
+    //private final SocialMediaPlatform socialMediaPlatform;
 
     @Autowired
     public YTService(YTDataRepo ytDataRepo) {
         this.ytDataRepo = ytDataRepo;
         ytApi = new YTApi();
-        socialMediaPlatform = new SocialMediaPlatform(2L);
+        //socialMediaPlatform = new SocialMediaPlatform(2L);
     }
 
-    public void getVideoData(String[] keys) throws IOException {
+    public void getVideoData(String[] keys, SocialMediaPlatform socialMediaPlatform) throws IOException {
         System.out.println("IN VID DATA");
 
         for (String key : keys) {
@@ -133,7 +134,7 @@ public class YTService {
 //                            continue;
 //                        }
 
-                    getComData(videoId, title, categoryId, viewCount, subscriberCount, hours, minutes, seconds);
+                    getComData(videoId, title, categoryId, viewCount, subscriberCount, hours, minutes, seconds, socialMediaPlatform);
                 } catch (Exception error) {
                     System.out.println("Something went wrong " + error);
                 }
@@ -141,7 +142,7 @@ public class YTService {
         }
     }
 
-    public void getComData(String videoId, String videoTitle, String categoryId, BigInteger viewCount, BigInteger subscriberCount, Integer hours, Integer minutes, Integer seconds) {
+    private void getComData(String videoId, String videoTitle, String categoryId, BigInteger viewCount, BigInteger subscriberCount, Integer hours, Integer minutes, Integer seconds, SocialMediaPlatform socialMediaPlatform) {
         System.out.println("from comment data");
 
         do {
@@ -168,7 +169,38 @@ public class YTService {
                     DateTime publishedAt = commentThread.getSnippet().getTopLevelComment().getSnippet().getPublishedAt();
 
 
-                    YTData ytData = new YTData(comId, videoId, textDisplay, likeCount, videoTitle, publishedAt.toString(), Integer.valueOf(categoryId), viewCount, subscriberCount, hours, minutes, seconds, socialMediaPlatform);
+                    //YTData ytData = new YTData(
+                    // comId,
+                    // videoId,
+                    // textDisplay,
+                    // likeCount,
+                    // videoTitle,
+                    // publishedAt.toString(),
+                    // Integer.valueOf(categoryId),
+                    // viewCount,
+                    // subscriberCount,
+                    // hours,
+                    // minutes,
+                    // seconds,
+                    // socialMediaPlatform);
+
+                    YTData ytData = new YTData();
+                    ytData.setComId(comId);
+                    ytData.setVideoId(videoId);
+                    ytData.setComment(textDisplay);
+                    ytData.setLikes(likeCount);
+                    ytData.setVidTitle(videoTitle);
+                    ytData.setPublicationTime(publishedAt.toString());
+                    ytData.setCategoryId(Integer.valueOf(categoryId));
+                    ytData.setViewCount(viewCount);
+                    ytData.setSubCount(subscriberCount);
+                    ytData.setHours(hours);
+                    ytData.setMinutes(minutes);
+                    ytData.setSeconds(seconds);
+
+                    socialMediaPlatform.setPlatformName(PlatformName.YOU_TUBE.name());
+                    ytData.setSocialMediaPlatform(socialMediaPlatform);
+
                     ytDataRepo.save(ytData);
                 }
             } catch (IOException e) {

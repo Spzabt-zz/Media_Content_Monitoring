@@ -3,7 +3,7 @@
 <@c.page>
     <div class="d-flex justify-content-between align-items-center">
         <h2>Projects</h2>
-        <a href="/new-project" class="btn btn-primary">+ Add new project</a>
+        <a href="/create-project" class="btn btn-primary">+ Add new project</a>
     </div>
     <br>
     <h5>Select a project and browse mentions</h5>
@@ -18,15 +18,24 @@
         </tr>
         </thead>
         <tbody class="table-group-divider">
-        <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>
-                <a href="/delete-project">Delete</a>
-                <a href="/edit-project">Edit</a>
-            </td>
-        </tr>
+        <#list projects as project>
+            <tr>
+                <th scope="row">${project.id}</th>
+                <td>${project.name}</td>
+                <td>${project.createdAt}</td>
+                <td>
+                    <form action="/delete-project/${project.id}" method="post">
+                        <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                        <a href="/delete-project/${project.id}" onclick="this.closest('form').submit();return false;">Delete</a>
+                    </form>
+
+<#--                    <form action="/edit-project/${project.id}" method="post">-->
+<#--                        <input type="hidden" name="_csrf" value="${_csrf.token}"/>-->
+                        <a href="/edit-project/${project.id}">Edit</a>
+<#--                    </form>-->
+                </td>
+            </tr>
+        </#list>
         </tbody>
     </table>
 </@c.page>
