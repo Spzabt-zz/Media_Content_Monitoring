@@ -2,5 +2,5 @@
 <#import "parts/projectCreationAndSettings.ftl" as projAsset>
 
 <@c.page>
-    <@projAsset.project "/edit-project" false/>
+    <@projAsset.projectSetup "/edit-project/${project.id}" false/>
 </@c.page>

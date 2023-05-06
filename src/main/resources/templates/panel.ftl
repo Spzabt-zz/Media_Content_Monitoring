@@ -21,7 +21,9 @@
         <#list projects as project>
             <tr>
                 <th scope="row">${project.id}</th>
-                <td>${project.name}</td>
+                <td>
+                    <a href="/panel/results/${project.id}">${project.name}</a>
+                </td>
                 <td>${project.createdAt}</td>
                 <td>
                     <form action="/delete-project/${project.id}" method="post">

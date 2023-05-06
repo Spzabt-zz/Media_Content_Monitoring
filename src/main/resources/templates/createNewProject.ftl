@@ -3,5 +3,5 @@
 
 
 <@c.page>
-    <@projAsset.project "/create-project" false/>
+    <@projAsset.projectSetup "/create-project" true/>
 </@c.page>
