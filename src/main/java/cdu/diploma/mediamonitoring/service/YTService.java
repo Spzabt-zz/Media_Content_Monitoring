@@ -37,10 +37,11 @@ public class YTService {
             YouTube.Search.List search = ytApi.getYoutubeService().search().list("id,snippet");
             search.setKey(YTApi.API_KEY);
             search.setType("video");
-            search.setMaxResults((long) 5);
+            search.setMaxResults((long) 3);
             //search.setFields("items(id(videoId),snippet(title,channelId,publishedAt))");
             //search.setQ(String.join("|", key));
             search.setQ(key);
+            search.setRelevanceLanguage("en");
             //search.setPageToken(this.nextPageToken);
             SearchListResponse searchResponse = search.execute();
             List<SearchResult> searchResultList = searchResponse.getItems();
@@ -83,13 +84,11 @@ public class YTService {
 
                     int hours = 0, minutes = 0, seconds = 0;
 
-                    // Check if the duration contains hours
                     int hoursIndex = duration.indexOf('H');
                     if (hoursIndex > 0) {
                         hours = Integer.parseInt(duration.substring(2, hoursIndex));
                     }
 
-                    // Check if the duration contains minutes
                     int minutesIndex = duration.indexOf('M');
                     if (minutesIndex > 0) {
                         if (hoursIndex < 0) {
@@ -99,7 +98,6 @@ public class YTService {
                         }
                     }
 
-                    // Check if the duration contains seconds
                     int secondsIndex = duration.indexOf('S');
                     if (secondsIndex > 0) {
                         if (minutesIndex < 0) {
@@ -145,6 +143,9 @@ public class YTService {
     private void getComData(String videoId, String videoTitle, String categoryId, BigInteger viewCount, BigInteger subscriberCount, Integer hours, Integer minutes, Integer seconds, SocialMediaPlatform socialMediaPlatform) {
         System.out.println("from comment data");
 
+        int counter = 0;
+        //String nextPageToken = "";
+
         do {
             try {
                 CommentThreadListResponse com_thread = ytApi.getYoutubeService().commentThreads().list("snippet")
@@ -162,27 +163,18 @@ public class YTService {
 
                     String textDisplay = commentThread.getSnippet().getTopLevelComment().getSnippet().getTextDisplay();
 
+                    if (textDisplay.isEmpty() || textDisplay.length() > 500) {
+                        continue;
+                    }
+                    if (counter >= 50) {
+                        continue;
+                    }
+
                     String comId = commentThread.getSnippet().getTopLevelComment().getId();
 
                     Long likeCount = commentThread.getSnippet().getTopLevelComment().getSnippet().getLikeCount();
 
                     DateTime publishedAt = commentThread.getSnippet().getTopLevelComment().getSnippet().getPublishedAt();
-
-
-                    //YTData ytData = new YTData(
-                    // comId,
-                    // videoId,
-                    // textDisplay,
-                    // likeCount,
-                    // videoTitle,
-                    // publishedAt.toString(),
-                    // Integer.valueOf(categoryId),
-                    // viewCount,
-                    // subscriberCount,
-                    // hours,
-                    // minutes,
-                    // seconds,
-                    // socialMediaPlatform);
 
                     YTData ytData = new YTData();
                     ytData.setComId(comId);
@@ -202,11 +194,13 @@ public class YTService {
                     ytData.setSocialMediaPlatform(socialMediaPlatform);
 
                     ytDataRepo.save(ytData);
+
+                    //nextPageToken = com_thread.getNextPageToken();
+                    counter++;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-        } while (this.nextPage_token != null);
+        } while (nextPage_token != null);
     }
 }

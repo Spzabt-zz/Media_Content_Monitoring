@@ -23,6 +23,7 @@ public class RedditData {
     private String subUrl;
     //private String userPostId;
     private String site;
+    private String sentiment;
 
 
     @ManyToOne

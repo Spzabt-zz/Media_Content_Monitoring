@@ -28,6 +28,7 @@ public class TwitterData {
     //private String tweetForUser;
     @Temporal(TemporalType.TIMESTAMP)
     private Date tweetedAt;
+    private String sentiment;
 
     @ManyToOne
     @JoinColumn(name = "social_media_platform_id")

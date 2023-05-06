@@ -82,6 +82,11 @@ public class TwitterService {
                 String id = String.valueOf(status.getId());
                 String link = "https://twitter.com/twitter/statuses/" + id;
                 String tweetText = status.getText();
+
+                if (tweetText.length() > 500) {
+                    return;
+                }
+
                 String username = status.getUser().getScreenName();
                 BigInteger followerCount = BigInteger.valueOf(status.getUser().getFollowersCount());
                 Integer friendCount = status.getUser().getFriendsCount();

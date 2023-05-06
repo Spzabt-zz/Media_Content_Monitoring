@@ -1,10 +1,7 @@
 package cdu.diploma.mediamonitoring.controller;
 
-import cdu.diploma.mediamonitoring.model.Project;
-import cdu.diploma.mediamonitoring.model.SocialMediaPlatform;
-import cdu.diploma.mediamonitoring.model.User;
-import cdu.diploma.mediamonitoring.repo.ProjectRepo;
-import cdu.diploma.mediamonitoring.repo.SocialMediaPlatformRepo;
+import cdu.diploma.mediamonitoring.model.*;
+import cdu.diploma.mediamonitoring.repo.*;
 import cdu.diploma.mediamonitoring.service.RedditService;
 import cdu.diploma.mediamonitoring.service.TwitterService;
 import cdu.diploma.mediamonitoring.service.YTService;
@@ -12,8 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -23,8 +18,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 public class ProjectController {
@@ -33,14 +30,20 @@ public class ProjectController {
     private final TwitterService twitterService;
     private final YTService ytService;
     private final ProjectRepo projectRepo;
+    private final RedditDataRepo redditDataRepo;
+    private final TwitterDataRepo twitterDataRepo;
+    private final YTDataRepo ytDataRepo;
 
     @Autowired
-    public ProjectController(SocialMediaPlatformRepo socialMediaPlatformRepo, RedditService redditService, TwitterService twitterService, YTService ytService, ProjectRepo projectRepo) {
+    public ProjectController(SocialMediaPlatformRepo socialMediaPlatformRepo, RedditService redditService, TwitterService twitterService, YTService ytService, ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo) {
         this.socialMediaPlatformRepo = socialMediaPlatformRepo;
         this.redditService = redditService;
         this.twitterService = twitterService;
         this.ytService = ytService;
         this.projectRepo = projectRepo;
+        this.redditDataRepo = redditDataRepo;
+        this.twitterDataRepo = twitterDataRepo;
+        this.ytDataRepo = ytDataRepo;
     }
 
     @GetMapping("/create-project")
@@ -69,7 +72,7 @@ public class ProjectController {
         socialMediaPlatformRepo.save(smp);
         projectRepo.save(project);
 
-        Project projectByUser = projectRepo.findByUser(user);
+        Project projectByUser = projectRepo.findByName(projName);
         SocialMediaPlatform socialMediaPlatform = projectByUser.getSocialMediaPlatform();
 
         String[] brandKeywords = separateKeywords(keys.toString());
@@ -84,8 +87,21 @@ public class ProjectController {
     @PostMapping("/delete-project/{projectId}")
     public String deleteProject(
             @AuthenticationPrincipal User user,
-            @PathVariable Long projectId) {
-        Project project = projectRepo.findProjectById(projectId);
+            @PathVariable String projectId) {
+        projectId = projectId.replace(",", "");
+        Long longProjId = Long.valueOf(projectId);
+
+        Project project = projectRepo.findProjectById(longProjId);
+        SocialMediaPlatform socialMediaPlatform = socialMediaPlatformRepo.findByProjectId(project.getId());
+
+        ArrayList<TwitterData> twitterData = twitterDataRepo.findAllBySocialMediaPlatform(socialMediaPlatform);
+        ArrayList<RedditData> redditData = redditDataRepo.findAllBySocialMediaPlatform(socialMediaPlatform);
+        ArrayList<YTData> ytData = ytDataRepo.findAllBySocialMediaPlatform(socialMediaPlatform);
+
+        twitterDataRepo.deleteAll(twitterData);
+        redditDataRepo.deleteAll(redditData);
+        ytDataRepo.deleteAll(ytData);
+        socialMediaPlatformRepo.delete(socialMediaPlatform);
         projectRepo.delete(project);
 
         return "redirect:/panel";
@@ -94,9 +110,12 @@ public class ProjectController {
     @GetMapping("/edit-project/{projectId}")
     public String getEditProject(
             @AuthenticationPrincipal User user,
-            @PathVariable Long projectId,
+            @PathVariable String projectId,
             Model model) {
-        Project project = projectRepo.findProjectById(projectId);
+        projectId = projectId.replace(",", "");
+        Long longProjId = Long.valueOf(projectId);
+
+        Project project = projectRepo.findProjectById(longProjId);
 
         String keywords = project.getKeywords();
 
@@ -110,10 +129,13 @@ public class ProjectController {
 
     @PostMapping("/edit-project/{projectId}")
     public String editProject(
-            @PathVariable Long projectId,
+            @PathVariable String projectId,
             @RequestParam("tags") String keywords,
             @RequestParam("brand") String projName) {
-        Project project = projectRepo.findProjectById(projectId);
+        projectId = projectId.replace(",", "");
+        Long longProjId = Long.valueOf(projectId);
+
+        Project project = projectRepo.findProjectById(longProjId);
         StringBuilder keys = getKeywordsStringFromJson(keywords);
 
         project.setName(projName);
@@ -130,7 +152,8 @@ public class ProjectController {
         StringBuilder keys = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            List<Keyword> keywordList = objectMapper.readValue(keywords, new TypeReference<List<Keyword>>(){});
+            List<Keyword> keywordList = objectMapper.readValue(keywords, new TypeReference<List<Keyword>>() {
+            });
 
             for (Keyword keyword : keywordList) {
                 keys.append(keyword.getValue()).append(", ");
@@ -147,9 +170,16 @@ public class ProjectController {
         String[] keys = keywords.split(",");
 
         for (int i = 0; i < keys.length; i++) {
-            keys[i] = keys[i].trim();
+            if (Objects.equals(keys[i], " "))
+                break;
+            else
+                keys[i] = keys[i].trim();
         }
-        return keys;
+
+        String[] newKeys = new String[keys.length - 1];
+        System.arraycopy(keys, 0, newKeys, 0, keys.length - 1);
+
+        return newKeys;
     }
 
     private static class Keyword {

@@ -8,7 +8,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import java.util.List;
 
 public class SentimentAnalysis {
-    private String doSentimentAnalysis(String message) {
+    public String doSentimentAnalysis(String message) {
         StanfordCoreNLP stanfordCoreNLP = Pipeline.getPipeline();
         CoreDocument coreDocument = new CoreDocument(message);
         stanfordCoreNLP.annotate(coreDocument);
