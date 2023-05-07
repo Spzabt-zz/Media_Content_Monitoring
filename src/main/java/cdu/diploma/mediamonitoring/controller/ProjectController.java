@@ -1,5 +1,6 @@
 package cdu.diploma.mediamonitoring.controller;
 
+import cdu.diploma.mediamonitoring.dto.Keyword;
 import cdu.diploma.mediamonitoring.model.*;
 import cdu.diploma.mediamonitoring.repo.*;
 import cdu.diploma.mediamonitoring.service.RedditService;
@@ -180,17 +181,5 @@ public class ProjectController {
         System.arraycopy(keys, 0, newKeys, 0, keys.length - 1);
 
         return newKeys;
-    }
-
-    private static class Keyword {
-        private String value;
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
     }
 }

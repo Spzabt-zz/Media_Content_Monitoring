@@ -20,13 +20,11 @@ public class YTService {
     private final YTApi ytApi;
     private final YTDataRepo ytDataRepo;
     private String nextPage_token;
-    //private final SocialMediaPlatform socialMediaPlatform;
 
     @Autowired
     public YTService(YTDataRepo ytDataRepo) {
         this.ytDataRepo = ytDataRepo;
         ytApi = new YTApi();
-        //socialMediaPlatform = new SocialMediaPlatform(2L);
     }
 
     public void getVideoData(String[] keys, SocialMediaPlatform socialMediaPlatform) throws IOException {
@@ -38,11 +36,8 @@ public class YTService {
             search.setKey(YTApi.API_KEY);
             search.setType("video");
             search.setMaxResults((long) 3);
-            //search.setFields("items(id(videoId),snippet(title,channelId,publishedAt))");
-            //search.setQ(String.join("|", key));
             search.setQ(key);
             search.setRelevanceLanguage("en");
-            //search.setPageToken(this.nextPageToken);
             SearchListResponse searchResponse = search.execute();
             List<SearchResult> searchResultList = searchResponse.getItems();
 
@@ -125,13 +120,6 @@ public class YTService {
                     BigInteger subscriberCount = channel.getStatistics().getSubscriberCount();
                     System.out.println("subscriberCount " + subscriberCount);
 
-//                    String publishedAt = videoInfo.getPublishedAt();
-//                        LocalDateTime publishedAtDateTime = LocalDateTime.parse(publishedAt, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-//                        LocalDateTime myDateTime = LocalDateTime.of(2023, 3, 22, 0, 0, 0);
-//                        if (publishedAtDateTime.isBefore(myDateTime)) {
-//                            continue;
-//                        }
-
                     getComData(videoId, title, categoryId, viewCount, subscriberCount, hours, minutes, seconds, socialMediaPlatform);
                 } catch (Exception error) {
                     System.out.println("Something went wrong " + error);
@@ -144,7 +132,6 @@ public class YTService {
         System.out.println("from comment data");
 
         int counter = 0;
-        //String nextPageToken = "";
 
         do {
             try {
@@ -195,7 +182,6 @@ public class YTService {
 
                     ytDataRepo.save(ytData);
 
-                    //nextPageToken = com_thread.getNextPageToken();
                     counter++;
                 }
             } catch (IOException e) {

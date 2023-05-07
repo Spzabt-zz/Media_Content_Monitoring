@@ -1,23 +1,31 @@
 package cdu.diploma.mediamonitoring.controller;
 
 import cdu.diploma.mediamonitoring.data.processing.SentimentAnalysis;
+import cdu.diploma.mediamonitoring.dto.AllData;
+import cdu.diploma.mediamonitoring.dto.SentimentData;
 import cdu.diploma.mediamonitoring.model.*;
 import cdu.diploma.mediamonitoring.repo.ProjectRepo;
 import cdu.diploma.mediamonitoring.repo.RedditDataRepo;
 import cdu.diploma.mediamonitoring.repo.TwitterDataRepo;
 import cdu.diploma.mediamonitoring.repo.YTDataRepo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Controller
@@ -144,6 +152,87 @@ public class DashboardController {
         ytDataRepo.saveAll(updatedYTData);
 
         model.addAttribute("project", project);
+
+        //sentiment data chart here
+        ArrayList<SentimentData> sentimentData = new ArrayList<>();
+        HashSet<String> dates = new HashSet<>();
+        List<TwitterData> allTwitterData = twitterDataRepo.findAllBySocialMediaPlatformOrderByTweetedAt(socialMediaPlatform);
+        List<RedditData> allRedditData = redditDataRepo.findAllBySocialMediaPlatformOrderBySubDate(socialMediaPlatform);
+        List<YTData> allYTData = ytDataRepo.findAllBySocialMediaPlatformOrderByPublicationTime(socialMediaPlatform);
+        ArrayList<AllData> allData = new ArrayList<>();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        for (TwitterData twitterData : allTwitterData) {
+            String formattedDate = sdf.format(twitterData.getTweetedAt());
+            allData.add(new AllData(formattedDate, twitterData.getSentiment()));
+        }
+
+        for (RedditData redditData : allRedditData) {
+            String formattedDate = sdf.format(redditData.getSubDate());
+            allData.add(new AllData(formattedDate, redditData.getSentiment()));
+        }
+
+        for (YTData ytData : allYTData) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            LocalDateTime dateTime = LocalDateTime.parse(ytData.getPublicationTime(), formatter);
+            int year = dateTime.getYear();
+            int month = dateTime.getMonthValue();
+            int day = dateTime.getDayOfMonth();
+            String date = "";
+            if (month < 10 && day < 10) {
+                date = String.valueOf(year + "-0" + month + "-0" + day);
+            } else if (month < 10) {
+                date = String.valueOf(year + "-0" + month + "-" + day);
+            } else if (day < 10) {
+                date = String.valueOf(year + "-" + month + "-0" + day);
+            } else {
+                date = String.valueOf(year + "-" + month + "-" + day);
+            }
+            allData.add(new AllData(date, ytData.getSentiment()));
+        }
+
+        allData.sort(new Comparator<AllData>() {
+            public int compare(AllData s1, AllData s2) {
+                return s1.getDate().compareTo(s2.getDate());
+            }
+        });
+
+        for (AllData allDatum : allData) {
+            dates.add(allDatum.getDate());
+        }
+
+        int posCount = 0;
+        int negCount = 0;
+        for (String date : dates) {
+            for (AllData allDatum : allData) {
+                if (date.equals(allDatum.getDate())) {
+                    if (Objects.equals(allDatum.getSentiment(), "Positive")) {
+                        posCount++;
+                    } else if (Objects.equals(allDatum.getSentiment(), "Negative")) {
+                        negCount++;
+                    }
+                }
+            }
+            sentimentData.add(new SentimentData(date, posCount, negCount));
+            posCount = 0;
+            negCount = 0;
+        }
+
+        sentimentData.sort(new Comparator<SentimentData>() {
+            public int compare(SentimentData s1, SentimentData s2) {
+                return s1.getDate().compareTo(s2.getDate());
+            }
+        });
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            String json = mapper.writeValueAsString(sentimentData);
+            model.addAttribute("charData", json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         Instant end = Instant.now();
         System.out.println(Duration.between(start, end));

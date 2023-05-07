@@ -8,4 +8,5 @@ import java.util.ArrayList;
 
 public interface RedditDataRepo extends JpaRepository<RedditData, Long> {
     ArrayList<RedditData> findAllBySocialMediaPlatform(SocialMediaPlatform socialMediaPlatform);
+    ArrayList<RedditData> findAllBySocialMediaPlatformOrderBySubDate(SocialMediaPlatform socialMediaPlatform);
 }

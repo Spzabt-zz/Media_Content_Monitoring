@@ -13,6 +13,50 @@
         </nav>
         <div class="home-content">
 
+            <canvas id="sentimentChart"></canvas>
+            <script>
+                (async function () {
+                    const data =
+                        ${charData}
+                        // {date: 2010, sentiment: {positive: 10, negative: 3}},
+                        // {date: 2011, sentiment: {positive: 2, negative: 20}},
+                        // {date: 2012, sentiment: {positive: 10, negative: 7}},
+                        // {date: 2013, sentiment: {positive: 5, negative: 9}},
+                        // {date: 2014, sentiment: {positive: 3, negative: 30}},
+                        // {date: 2015, sentiment: {positive: 54, negative: 120}},
+                        // {date: 2016, sentiment: {positive: 50, negative: 32}},
+                    ;
+
+                    new Chart(
+                        document.getElementById('sentimentChart'),
+                        {
+                            type: 'line',
+                            data: {
+                                labels: data.map(row => row.date),
+                                datasets: [
+                                    {
+                                        label: 'Positive',
+                                        data: data.map(row => row.sentiment.positive),
+                                        fill: false,
+                                        borderColor: 'rgb(0,255,49)',
+                                        tension: 0.3
+                                    },
+                                    {
+                                        label: 'Negative',
+                                        data: data.map(row => row.sentiment.negative),
+                                        fill: false,
+                                        borderColor: 'rgb(255,0,0)',
+                                        tension: 0.3
+                                    }
+                                ]
+                            }
+                        }
+                    );
+                })();
+            </script>
+
+            <#-------------------------------------------------------------------------->
+
             <div class="tab">
                 <button class="tablinks" onclick="openTab(event, 'tab1')">
                     <img src="/static/img/assets/youtube.png"/>
