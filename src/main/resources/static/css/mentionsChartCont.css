@@ -1,4 +1,4 @@
-.chart-container {
+.chart-container2 {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -7,14 +7,14 @@
     height: 500px;
 }
 
-#sentimentPie {
-    max-width: 30%;
+#mentionsChart {
+    max-width: 70%;
     max-height: 100%;
     object-fit: contain;
 }
 
-#sentimentChart {
-    max-width: 70%;
+#word-cloud {
+    max-width: 30%;
     max-height: 100%;
     object-fit: contain;
 }

@@ -3,10 +3,12 @@ package cdu.diploma.mediamonitoring.dto;
 public class AllDataDto {
     private String date;
     private String sentiment;
+    private String text;
 
-    public AllDataDto(String date, String sentiment) {
+    public AllDataDto(String date, String sentiment, String text) {
         this.date = date;
         this.sentiment = sentiment;
+        this.text = text;
     }
 
     public String getSentiment() {
@@ -23,5 +25,13 @@ public class AllDataDto {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }

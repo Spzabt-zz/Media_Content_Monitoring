@@ -17,9 +17,10 @@
                 <canvas id="sentimentChart" width="600" height="200"></canvas>
             </div>
 
-            <div class="chart-container">
+            <div class="chart-container2">
                 <canvas id="mentionsChart" width="600" height="200"></canvas>
             </div>
+            <div id="word-cloud"></div>
 
             <script>
                 const sentimentPieData = ${sentimentPieData};
@@ -31,6 +32,10 @@
 
             <script>
                 const mentionChartData = ${mentionChartData}
+            </script>
+
+            <script>
+                const words = ${words};
             </script>
 
             <div class="tab">

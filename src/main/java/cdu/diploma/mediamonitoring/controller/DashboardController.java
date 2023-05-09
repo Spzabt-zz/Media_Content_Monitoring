@@ -1,6 +1,7 @@
 package cdu.diploma.mediamonitoring.controller;
 
 import cdu.diploma.mediamonitoring.data.processing.SentimentAnalysis;
+import cdu.diploma.mediamonitoring.data.processing.WordCloudGenerator;
 import cdu.diploma.mediamonitoring.dto.AllDataDto;
 import cdu.diploma.mediamonitoring.dto.MentionsDto;
 import cdu.diploma.mediamonitoring.dto.SentimentDataDto;
@@ -18,6 +19,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.awt.*;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -25,6 +28,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -168,12 +172,16 @@ public class DashboardController {
 
         for (TwitterData twitterData : allTwitterData) {
             String formattedDate = sdf.format(twitterData.getTweetedAt());
-            allData.add(new AllDataDto(formattedDate, twitterData.getSentiment()));
+            allData.add(new AllDataDto(formattedDate, twitterData.getSentiment(), twitterData.getTweet()));
         }
 
         for (RedditData redditData : allRedditData) {
             String formattedDate = sdf.format(redditData.getSubDate());
-            allData.add(new AllDataDto(formattedDate, redditData.getSentiment()));
+
+            if (Objects.equals(redditData.getSubBody(), ""))
+                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubTitle()));
+            else
+                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubBody()));
         }
 
         for (YTData ytData : allYTData) {
@@ -192,7 +200,7 @@ public class DashboardController {
             } else {
                 date = String.valueOf(year + "-" + month + "-" + day);
             }
-            allData.add(new AllDataDto(date, ytData.getSentiment()));
+            allData.add(new AllDataDto(date, ytData.getSentiment(), ytData.getComment()));
         }
 
         allData.sort(new Comparator<AllDataDto>() {
@@ -303,6 +311,26 @@ public class DashboardController {
         }
 
         //todo: word cloud
+        List<Map<String, Object>> words = new ArrayList<>();
+
+        for (AllDataDto allDatum : allData) {
+            Map<String, Object> individual = new HashMap<>();
+            individual.put("title", allDatum.getText());
+            words.add(individual);
+        }
+
+        WordCloudGenerator wordCloudGenerator = new WordCloudGenerator(words);
+
+        mapper = new ObjectMapper();
+
+        try {
+            String json = mapper.writeValueAsString(wordCloudGenerator.generateWordCloud());
+            model.addAttribute("words", json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
         //todo: reach count chart
 
@@ -319,5 +347,17 @@ public class DashboardController {
         model.addAttribute("projects", projects);
 
         return "panel";
+    }
+
+    private static class WordCloudData {
+        public static List<Map<String, Object>> getWords() {
+            List<Map<String, Object>> words = new ArrayList<>();
+            words.add(Map.of("text", "Lorem", "size", 10));
+            words.add(Map.of("text", "ipsum", "size", 20));
+            words.add(Map.of("text", "dolor", "size", 30));
+            words.add(Map.of("text", "sit", "size", 40));
+            words.add(Map.of("text", "amet", "size", 50));
+            return words;
+        }
     }
 }
