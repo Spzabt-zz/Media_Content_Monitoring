@@ -1,8 +1,10 @@
 package cdu.diploma.mediamonitoring.controller;
 
 import cdu.diploma.mediamonitoring.data.processing.SentimentAnalysis;
-import cdu.diploma.mediamonitoring.dto.AllData;
-import cdu.diploma.mediamonitoring.dto.SentimentData;
+import cdu.diploma.mediamonitoring.dto.AllDataDto;
+import cdu.diploma.mediamonitoring.dto.MentionsDto;
+import cdu.diploma.mediamonitoring.dto.SentimentDataDto;
+import cdu.diploma.mediamonitoring.dto.SentimentPieDto;
 import cdu.diploma.mediamonitoring.model.*;
 import cdu.diploma.mediamonitoring.repo.ProjectRepo;
 import cdu.diploma.mediamonitoring.repo.RedditDataRepo;
@@ -16,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -76,7 +79,7 @@ public class DashboardController {
         ExecutorService youtubeExecutor = Executors.newFixedThreadPool(5);
 
         futures.add(twitterExecutor.submit(() -> {
-            List<TwitterData> allTwitterData = twitterDataRepo.findAllBySocialMediaPlatform(socialMediaPlatform);
+            List<TwitterData> allTwitterData = twitterDataRepo.findAllBySocialMediaPlatformOrderByTweetedAtDesc(socialMediaPlatform);
             for (TwitterData twitterData : allTwitterData) {
                 if (twitterData.getSentiment() != null) {
                     isAnalysedTwitter.set(true);
@@ -94,7 +97,7 @@ public class DashboardController {
         }));
 
         futures.add(redditExecutor.submit(() -> {
-            List<RedditData> allRedditData = redditDataRepo.findAllBySocialMediaPlatform(socialMediaPlatform);
+            List<RedditData> allRedditData = redditDataRepo.findAllBySocialMediaPlatformOrderBySubDateDesc(socialMediaPlatform);
             for (RedditData redditData : allRedditData) {
                 if (redditData.getSentiment() != null) {
                     isAnalysedReddit.set(true);
@@ -118,7 +121,7 @@ public class DashboardController {
         }));
 
         futures.add(youtubeExecutor.submit(() -> {
-            List<YTData> allYTData = ytDataRepo.findAllBySocialMediaPlatform(socialMediaPlatform);
+            List<YTData> allYTData = ytDataRepo.findAllBySocialMediaPlatformOrderByPublicationTimeDesc(socialMediaPlatform);
             for (YTData ytData : allYTData) {
                 if (ytData.getSentiment() != null) {
                     isAnalysedYouTube.set(true);
@@ -154,23 +157,23 @@ public class DashboardController {
         model.addAttribute("project", project);
 
         //sentiment data chart here
-        ArrayList<SentimentData> sentimentData = new ArrayList<>();
+        ArrayList<SentimentDataDto> sentimentData = new ArrayList<>();
         HashSet<String> dates = new HashSet<>();
         List<TwitterData> allTwitterData = twitterDataRepo.findAllBySocialMediaPlatformOrderByTweetedAt(socialMediaPlatform);
         List<RedditData> allRedditData = redditDataRepo.findAllBySocialMediaPlatformOrderBySubDate(socialMediaPlatform);
         List<YTData> allYTData = ytDataRepo.findAllBySocialMediaPlatformOrderByPublicationTime(socialMediaPlatform);
-        ArrayList<AllData> allData = new ArrayList<>();
+        ArrayList<AllDataDto> allData = new ArrayList<>();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         for (TwitterData twitterData : allTwitterData) {
             String formattedDate = sdf.format(twitterData.getTweetedAt());
-            allData.add(new AllData(formattedDate, twitterData.getSentiment()));
+            allData.add(new AllDataDto(formattedDate, twitterData.getSentiment()));
         }
 
         for (RedditData redditData : allRedditData) {
             String formattedDate = sdf.format(redditData.getSubDate());
-            allData.add(new AllData(formattedDate, redditData.getSentiment()));
+            allData.add(new AllDataDto(formattedDate, redditData.getSentiment()));
         }
 
         for (YTData ytData : allYTData) {
@@ -189,38 +192,38 @@ public class DashboardController {
             } else {
                 date = String.valueOf(year + "-" + month + "-" + day);
             }
-            allData.add(new AllData(date, ytData.getSentiment()));
+            allData.add(new AllDataDto(date, ytData.getSentiment()));
         }
 
-        allData.sort(new Comparator<AllData>() {
-            public int compare(AllData s1, AllData s2) {
+        allData.sort(new Comparator<AllDataDto>() {
+            public int compare(AllDataDto s1, AllDataDto s2) {
                 return s1.getDate().compareTo(s2.getDate());
             }
         });
 
-        for (AllData allDatum : allData) {
+        for (AllDataDto allDatum : allData) {
             dates.add(allDatum.getDate());
         }
 
         int posCount = 0;
         int negCount = 0;
         for (String date : dates) {
-            for (AllData allDatum : allData) {
+            for (AllDataDto allDatum : allData) {
                 if (date.equals(allDatum.getDate())) {
-                    if (Objects.equals(allDatum.getSentiment(), "Positive")) {
+                    if (Objects.equals(allDatum.getSentiment(), "Positive") || Objects.equals(allDatum.getSentiment(), "Very positive")) {
                         posCount++;
-                    } else if (Objects.equals(allDatum.getSentiment(), "Negative")) {
+                    } else if (Objects.equals(allDatum.getSentiment(), "Negative") || Objects.equals(allDatum.getSentiment(), "Very negative")) {
                         negCount++;
                     }
                 }
             }
-            sentimentData.add(new SentimentData(date, posCount, negCount));
+            sentimentData.add(new SentimentDataDto(date, posCount, negCount));
             posCount = 0;
             negCount = 0;
         }
 
-        sentimentData.sort(new Comparator<SentimentData>() {
-            public int compare(SentimentData s1, SentimentData s2) {
+        sentimentData.sort(new Comparator<SentimentDataDto>() {
+            public int compare(SentimentDataDto s1, SentimentDataDto s2) {
                 return s1.getDate().compareTo(s2.getDate());
             }
         });
@@ -229,10 +232,79 @@ public class DashboardController {
 
         try {
             String json = mapper.writeValueAsString(sentimentData);
-            model.addAttribute("charData", json);
+            model.addAttribute("sentimentChartData", json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+
+        //todo: sentiment pie diagram +
+        HashSet<String> sentimentPieces = new HashSet<>();
+        ArrayList<SentimentPieDto> sentimentPieDtos = new ArrayList<>();
+
+        for (AllDataDto allDatum : allData) {
+            sentimentPieces.add(allDatum.getSentiment());
+        }
+
+        int count = 0;
+        int totalSentimentPieces = allData.size();
+        for (String sentiment : sentimentPieces) {
+            for (AllDataDto allDatum : allData) {
+                if (sentiment.equals(allDatum.getSentiment())) {
+                    count++;
+                }
+            }
+            double percentage = (double) count / totalSentimentPieces * 100.0;
+            sentimentPieDtos.add(new SentimentPieDto(sentiment, count, Math.round(percentage)));
+            count = 0;
+        }
+
+        sentimentPieDtos.sort(new Comparator<SentimentPieDto>() {
+            public int compare(SentimentPieDto s1, SentimentPieDto s2) {
+                return s1.getSentiment().compareTo(s2.getSentiment());
+            }
+        });
+
+        mapper = new ObjectMapper();
+
+        try {
+            String json = mapper.writeValueAsString(sentimentPieDtos);
+            model.addAttribute("sentimentPieData", json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        //todo: mentions count chart
+        ArrayList<MentionsDto> mentions = new ArrayList<>();
+
+        int mentionsCount = 0;
+        for (String date : dates) {
+            for (AllDataDto allDatum : allData) {
+                if (date.equals(allDatum.getDate())) {
+                    mentionsCount++;
+                }
+            }
+            mentions.add(new MentionsDto(date, mentionsCount));
+            mentionsCount = 0;
+        }
+
+        mentions.sort(new Comparator<MentionsDto>() {
+            public int compare(MentionsDto s1, MentionsDto s2) {
+                return s1.getDate().compareTo(s2.getDate());
+            }
+        });
+
+        mapper = new ObjectMapper();
+
+        try {
+            String json = mapper.writeValueAsString(mentions);
+            model.addAttribute("mentionChartData", json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        //todo: word cloud
+
+        //todo: reach count chart
 
         Instant end = Instant.now();
         System.out.println(Duration.between(start, end));

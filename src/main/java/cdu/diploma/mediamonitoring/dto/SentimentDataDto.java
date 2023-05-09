@@ -1,14 +1,13 @@
 package cdu.diploma.mediamonitoring.dto;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SentimentData {
+public class SentimentDataDto {
     private String date;
     private Map<String, Integer> sentiment;
 
-    public SentimentData(String date, int positiveCount, int negativeCount) {
+    public SentimentDataDto(String date, int positiveCount, int negativeCount) {
         this.date = date;
         this.sentiment = new HashMap<>();
         this.sentiment.put("positive", positiveCount);

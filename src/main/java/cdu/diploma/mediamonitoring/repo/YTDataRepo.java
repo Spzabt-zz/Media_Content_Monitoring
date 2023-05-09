@@ -9,4 +9,5 @@ import java.util.ArrayList;
 public interface YTDataRepo extends JpaRepository<YTData, Long> {
     ArrayList<YTData> findAllBySocialMediaPlatform(SocialMediaPlatform socialMediaPlatform);
     ArrayList<YTData> findAllBySocialMediaPlatformOrderByPublicationTime(SocialMediaPlatform socialMediaPlatform);
+    ArrayList<YTData> findAllBySocialMediaPlatformOrderByPublicationTimeDesc(SocialMediaPlatform socialMediaPlatform);
 }

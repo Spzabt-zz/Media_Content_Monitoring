@@ -4,7 +4,7 @@
 <@c.page>
     <div class="homepage">
         <div class="home-nav">
-            <div class="home-name ml-6 mt-3">Social Sprout</div>
+            <div class="home-name ml-6 mt-3">Social Monitoring</div>
         </div>
         <hr class="container" style="outline: none; border: none; background-color: black; height: 0.5px; width: 80%;"/>
 

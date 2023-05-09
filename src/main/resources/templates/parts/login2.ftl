@@ -2,7 +2,7 @@
     <div class="form-div">
         <div class="wave"><img src="/static/img/assets/wave.png" style="width: 1550px; height: 710px;"></div>
         <div class="form-card">
-            <div class="form-title">Social Sprout</div>
+            <div class="form-title">Social Monitoring</div>
             <hr class="container mt-2"
                 style="outline: none; border: none; background-color: black; height: 0.5px; width: 50%;">
             <div class="d-flex">

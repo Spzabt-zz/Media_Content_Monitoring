@@ -3,37 +3,37 @@
 
 <div class="sidebar">
     <div class="logo-details">
-        <i class='bx bxl-c-plus-plus'></i>
-        <span class="logo_name">CodingLab</span>
+        <i class='bx bxl-meta'></i>
+        <span class="logo_name">Social Monitoring</span>
     </div>
     <ul class="nav-links">
         <li>
             <a href="/panel/results/${project.id}" class="active">
-                <i class='bx bx-grid-alt'></i>
+                <i class='bx bx-pie-chart-alt-2'></i>
                 <span class="links_name">Mentions</span>
             </a>
         </li>
         <li>
             <a href="/panel/analysis/${project.id}">
-                <i class='bx bx-pie-chart-alt-2'></i>
+                <i class='bx bx-analyse' ></i>
                 <span class="links_name">Analysis</span>
             </a>
         </li>
         <li>
             <a href="/panel/sources/${project.id}">
-                <i class='bx bx-list-ul'></i>
+                <i class='bx bx-link-external'></i>
                 <span class="links_name">Sources</span>
             </a>
         </li>
         <li>
             <a href="/panel/comparison/${project.id}">
-                <i class='bx bx-heart'></i>
+                <i class='bx bx-git-compare' ></i>
                 <span class="links_name">Comparison</span>
             </a>
         </li>
         <li>
             <a href="/panel/report/${project.id}">
-                <i class='bx bx-book-alt'></i>
+                <i class='bx bxs-report' ></i>
                 <span class="links_name">PDF report</span>
             </a>
         </li>
@@ -45,7 +45,7 @@
         </li>
         <li>
             <a href="/panel">
-                <i class='bx bx-coin-stack'></i>
+                <i class='bx bx-list-ul' ></i>
                 <span class="links_name">Project list</span>
             </a>
         </li>

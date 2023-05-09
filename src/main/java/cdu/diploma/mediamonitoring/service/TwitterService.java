@@ -52,6 +52,7 @@ public class TwitterService {
         }
     }
 
+    //todo: get rid of duplicates when retrieving data
     private void saveTweetsInDb(Status status, String[] keywords, SocialMediaPlatform socialMediaPlatform) {
         if (status.getLang().equals("en")) {
             List<String> present = new ArrayList<>();

@@ -1,6 +1,6 @@
 package cdu.diploma.mediamonitoring.controller;
 
-import cdu.diploma.mediamonitoring.dto.Keyword;
+import cdu.diploma.mediamonitoring.dto.KeywordDto;
 import cdu.diploma.mediamonitoring.model.*;
 import cdu.diploma.mediamonitoring.repo.*;
 import cdu.diploma.mediamonitoring.service.RedditService;
@@ -153,10 +153,10 @@ public class ProjectController {
         StringBuilder keys = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            List<Keyword> keywordList = objectMapper.readValue(keywords, new TypeReference<List<Keyword>>() {
+            List<KeywordDto> keywordList = objectMapper.readValue(keywords, new TypeReference<List<KeywordDto>>() {
             });
 
-            for (Keyword keyword : keywordList) {
+            for (KeywordDto keyword : keywordList) {
                 keys.append(keyword.getValue()).append(", ");
             }
         } catch (JsonProcessingException e) {

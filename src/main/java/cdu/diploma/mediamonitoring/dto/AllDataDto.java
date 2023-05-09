@@ -1,10 +1,10 @@
 package cdu.diploma.mediamonitoring.dto;
 
-public class AllData {
+public class AllDataDto {
     private String date;
     private String sentiment;
 
-    public AllData(String date, String sentiment) {
+    public AllDataDto(String date, String sentiment) {
         this.date = date;
         this.sentiment = sentiment;
     }

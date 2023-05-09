@@ -7,6 +7,7 @@ for (let i = 0; i < tabcontents.length; i++) {
 // Get all elements with class="tablinks" and add the "active" class to the first button
 let tablinks = document.getElementsByClassName("tablinks");
 tablinks[0].classList.add("active");
+tabcontents[0].classList.add("show");
 
 // Define function to open the clicked tab and hide the others
 function openTab(event, tabName) {

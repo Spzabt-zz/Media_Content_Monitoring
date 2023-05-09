@@ -128,6 +128,7 @@ public class YTService {
         }
     }
 
+    //todo: get rid of duplicates when retrieving data
     private void getComData(String videoId, String videoTitle, String categoryId, BigInteger viewCount, BigInteger subscriberCount, Integer hours, Integer minutes, Integer seconds, SocialMediaPlatform socialMediaPlatform) {
         System.out.println("from comment data");
 

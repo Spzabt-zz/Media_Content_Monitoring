@@ -34,6 +34,7 @@ public class RedditService {
         redditApi = new RedditApi();
     }
 
+    //todo: get rid of duplicates when retrieving data
     public List<String> searchReddit(String[] keywords, SocialMediaPlatform socialMediaPlatform) throws Exception {
         String accessToken = redditApi.getAccessToken();
 

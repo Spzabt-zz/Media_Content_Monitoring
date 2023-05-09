@@ -9,4 +9,5 @@ import java.util.ArrayList;
 public interface TwitterDataRepo extends JpaRepository<TwitterData, Long> {
     ArrayList<TwitterData> findAllBySocialMediaPlatform(SocialMediaPlatform socialMediaPlatform);
     ArrayList<TwitterData> findAllBySocialMediaPlatformOrderByTweetedAt(SocialMediaPlatform socialMediaPlatform);
+    ArrayList<TwitterData> findAllBySocialMediaPlatformOrderByTweetedAtDesc(SocialMediaPlatform socialMediaPlatform);
 }
