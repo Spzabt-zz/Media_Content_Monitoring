@@ -30,11 +30,7 @@
                         <input type="hidden" name="_csrf" value="${_csrf.token}"/>
                         <a href="/delete-project/${project.id}" onclick="this.closest('form').submit();return false;">Delete</a>
                     </form>
-
-<#--                    <form action="/edit-project/${project.id}" method="post">-->
-<#--                        <input type="hidden" name="_csrf" value="${_csrf.token}"/>-->
-                        <a href="/edit-project/${project.id}">Edit</a>
-<#--                    </form>-->
+                    <a href="/edit-project/${project.id}">Edit</a>
                 </td>
             </tr>
         </#list>

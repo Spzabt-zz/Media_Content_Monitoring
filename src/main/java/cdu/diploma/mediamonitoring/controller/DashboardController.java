@@ -1,6 +1,5 @@
 package cdu.diploma.mediamonitoring.controller;
 
-import cdu.diploma.mediamonitoring.data.processing.SentimentAnalysis;
 import cdu.diploma.mediamonitoring.data.processing.WordCloudGenerator;
 import cdu.diploma.mediamonitoring.dto.AllDataDto;
 import cdu.diploma.mediamonitoring.dto.MentionsDto;
@@ -11,17 +10,20 @@ import cdu.diploma.mediamonitoring.repo.ProjectRepo;
 import cdu.diploma.mediamonitoring.repo.RedditDataRepo;
 import cdu.diploma.mediamonitoring.repo.TwitterDataRepo;
 import cdu.diploma.mediamonitoring.repo.YTDataRepo;
+import cdu.diploma.mediamonitoring.service.AnalysingService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.awt.*;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Array;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -29,11 +31,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Controller
 public class DashboardController {
@@ -41,14 +38,15 @@ public class DashboardController {
     private final RedditDataRepo redditDataRepo;
     private final TwitterDataRepo twitterDataRepo;
     private final YTDataRepo ytDataRepo;
-    private final SentimentAnalysis sentimentAnalysis;
+    private AnalysingService analysingService;
 
-    public DashboardController(ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo) {
+    @Autowired
+    public DashboardController(ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, AnalysingService analysingService) {
         this.projectRepo = projectRepo;
         this.redditDataRepo = redditDataRepo;
         this.twitterDataRepo = twitterDataRepo;
         this.ytDataRepo = ytDataRepo;
-        this.sentimentAnalysis = new SentimentAnalysis();
+        this.analysingService = analysingService;
     }
 
     @GetMapping("/")
@@ -59,12 +57,8 @@ public class DashboardController {
     }
 
     @GetMapping("/panel/results/{projectId}")
-    public String mentions(@PathVariable String projectId, Model model) {
+    public String mentions(@PathVariable String projectId, @RequestParam(value = "source", required = false) String source, Model model) {
         Instant start = Instant.now();
-
-        AtomicBoolean isAnalysedTwitter = new AtomicBoolean(false);
-        AtomicBoolean isAnalysedReddit = new AtomicBoolean(false);
-        AtomicBoolean isAnalysedYouTube = new AtomicBoolean(false);
 
         projectId = projectId.replace(",", "");
         Long longProjId = Long.valueOf(projectId);
@@ -72,91 +66,7 @@ public class DashboardController {
         Project project = projectRepo.findProjectById(longProjId);
         SocialMediaPlatform socialMediaPlatform = project.getSocialMediaPlatform();
 
-        List<TwitterData> updatedTwitterData = new ArrayList<>();
-        List<RedditData> updatedRedditData = new ArrayList<>();
-        List<YTData> updatedYTData = new ArrayList<>();
-
-        List<Future<?>> futures = new ArrayList<>();
-
-        ExecutorService twitterExecutor = Executors.newFixedThreadPool(5);
-        ExecutorService redditExecutor = Executors.newFixedThreadPool(5);
-        ExecutorService youtubeExecutor = Executors.newFixedThreadPool(5);
-
-        futures.add(twitterExecutor.submit(() -> {
-            List<TwitterData> allTwitterData = twitterDataRepo.findAllBySocialMediaPlatformOrderByTweetedAtDesc(socialMediaPlatform);
-            for (TwitterData twitterData : allTwitterData) {
-                if (twitterData.getSentiment() != null) {
-                    isAnalysedTwitter.set(true);
-                    continue;
-                }
-                String sentiment = sentimentAnalysis.doSentimentAnalysis(twitterData.getTweet());
-                System.out.println("twitter: " + sentiment);
-                twitterData.setSentiment(sentiment);
-                updatedTwitterData.add(twitterData);
-            }
-            if (isAnalysedTwitter.get())
-                model.addAttribute("allTwitterData", allTwitterData);
-            else
-                model.addAttribute("allTwitterData", updatedTwitterData);
-        }));
-
-        futures.add(redditExecutor.submit(() -> {
-            List<RedditData> allRedditData = redditDataRepo.findAllBySocialMediaPlatformOrderBySubDateDesc(socialMediaPlatform);
-            for (RedditData redditData : allRedditData) {
-                if (redditData.getSentiment() != null) {
-                    isAnalysedReddit.set(true);
-                    continue;
-                }
-                if (!Objects.equals(redditData.getSubBody(), "")) {
-                    String sentiment = sentimentAnalysis.doSentimentAnalysis(redditData.getSubBody());
-                    System.out.println("reddit: " + sentiment);
-                    redditData.setSentiment(sentiment);
-                } else {
-                    String sentiment = sentimentAnalysis.doSentimentAnalysis(redditData.getSubTitle());
-                    System.out.println("reddit: " + sentiment);
-                    redditData.setSentiment(sentiment);
-                }
-                updatedRedditData.add(redditData);
-            }
-            if (isAnalysedReddit.get())
-                model.addAttribute("allRedditData", allRedditData);
-            else
-                model.addAttribute("allRedditData", updatedRedditData);
-        }));
-
-        futures.add(youtubeExecutor.submit(() -> {
-            List<YTData> allYTData = ytDataRepo.findAllBySocialMediaPlatformOrderByPublicationTimeDesc(socialMediaPlatform);
-            for (YTData ytData : allYTData) {
-                if (ytData.getSentiment() != null) {
-                    isAnalysedYouTube.set(true);
-                    continue;
-                }
-                String sentiment = sentimentAnalysis.doSentimentAnalysis(ytData.getComment());
-                System.out.println("youtube: " + sentiment);
-                ytData.setSentiment(sentiment);
-                updatedYTData.add(ytData);
-            }
-            if (isAnalysedYouTube.get())
-                model.addAttribute("allYTData", allYTData);
-            else
-                model.addAttribute("allYTData", updatedYTData);
-        }));
-
-        for (Future<?> future : futures) {
-            try {
-                future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-
-        twitterExecutor.shutdown();
-        redditExecutor.shutdown();
-        youtubeExecutor.shutdown();
-
-        twitterDataRepo.saveAll(updatedTwitterData);
-        redditDataRepo.saveAll(updatedRedditData);
-        ytDataRepo.saveAll(updatedYTData);
+        analysingService.doParallelSentimentAnalysis(model, socialMediaPlatform);
 
         model.addAttribute("project", project);
 
@@ -172,16 +82,16 @@ public class DashboardController {
 
         for (TwitterData twitterData : allTwitterData) {
             String formattedDate = sdf.format(twitterData.getTweetedAt());
-            allData.add(new AllDataDto(formattedDate, twitterData.getSentiment(), twitterData.getTweet()));
+            allData.add(new AllDataDto(formattedDate, twitterData.getSentiment(), twitterData.getTweet(), new BigInteger("0"), twitterData.getListedCount(), twitterData.getFollowerCount(), twitterData.getFriendCount(), new BigInteger("0")));
         }
 
         for (RedditData redditData : allRedditData) {
             String formattedDate = sdf.format(redditData.getSubDate());
 
             if (Objects.equals(redditData.getSubBody(), ""))
-                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubTitle()));
+                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubTitle(), redditData.getSubSubscribers(), 0, new BigInteger("0"), 0, new BigInteger("0")));
             else
-                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubBody()));
+                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubBody(), redditData.getSubSubscribers(), 0, new BigInteger("0"), 0, new BigInteger("0")));
         }
 
         for (YTData ytData : allYTData) {
@@ -200,7 +110,7 @@ public class DashboardController {
             } else {
                 date = String.valueOf(year + "-" + month + "-" + day);
             }
-            allData.add(new AllDataDto(date, ytData.getSentiment(), ytData.getComment()));
+            allData.add(new AllDataDto(date, ytData.getSentiment(), ytData.getComment(), new BigInteger("0"), 0, new BigInteger("0"), 0, ytData.getSubCount()));
         }
 
         allData.sort(new Comparator<AllDataDto>() {
@@ -245,7 +155,7 @@ public class DashboardController {
             e.printStackTrace();
         }
 
-        //todo: sentiment pie diagram +
+        //todo: sentiment pie diagram
         HashSet<String> sentimentPieces = new HashSet<>();
         ArrayList<SentimentPieDto> sentimentPieDtos = new ArrayList<>();
 
@@ -333,6 +243,53 @@ public class DashboardController {
         }
 
         //todo: reach count chart
+        final double TWITTER_WEIGHT = 1.0;
+        final double REDDIT_WEIGHT = 1.0;
+        final double YOUTUBE_WEIGHT = 1.0;
+
+        ArrayList<MentionsDto> smReach = new ArrayList<>();
+        for (String date : dates) {
+            int reach = 0;
+            Set<Integer> processedAccounts = new HashSet<>();
+            for (AllDataDto allDatum : allData) {
+                if (date.equals(allDatum.getDate())) {
+                    //todo: add views parameter
+                    if (!processedAccounts.contains(allDatum.getTwitterFollowerCount().intValue())
+                            || !processedAccounts.contains(allDatum.getTwitterFriendCount())
+                            || !processedAccounts.contains(allDatum.getTwitterListedCount())) {
+                        reach += allDatum.getTwitterFriendCount() * TWITTER_WEIGHT
+                                + allDatum.getTwitterListedCount() * TWITTER_WEIGHT
+                                + allDatum.getTwitterFollowerCount().intValue() * TWITTER_WEIGHT;
+                        processedAccounts.add(allDatum.getTwitterFollowerCount().intValue());
+                        processedAccounts.add(allDatum.getTwitterFriendCount());
+                        processedAccounts.add(allDatum.getTwitterListedCount());
+                    }
+                    if (!processedAccounts.contains(allDatum.getRedditSubSubscribers().intValue())) {
+                        reach += allDatum.getRedditSubSubscribers().intValue() * REDDIT_WEIGHT;
+                        processedAccounts.add(allDatum.getRedditSubSubscribers().intValue());
+                    }
+                    if (!processedAccounts.contains(allDatum.getYouTubeChannelSubscriberCount().intValue())) {
+                        reach += allDatum.getYouTubeChannelSubscriberCount().intValue() * YOUTUBE_WEIGHT;
+                        processedAccounts.add(allDatum.getYouTubeChannelSubscriberCount().intValue());
+                    }
+                }
+            }
+            smReach.add(new MentionsDto(date, reach));
+        }
+
+        smReach.sort(new Comparator<MentionsDto>() {
+            public int compare(MentionsDto s1, MentionsDto s2) {
+                return s1.getDate().compareTo(s2.getDate());
+            }
+        });
+
+        mapper = new ObjectMapper();
+        try {
+            String json = mapper.writeValueAsString(smReach);
+            model.addAttribute("reachChartData", json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         Instant end = Instant.now();
         System.out.println(Duration.between(start, end));
@@ -347,6 +304,42 @@ public class DashboardController {
         model.addAttribute("projects", projects);
 
         return "panel";
+    }
+
+    @GetMapping("/panel/sources/{projectId}")
+    public String analyseBySource(@PathVariable String projectId, Model model) {
+        projectId = projectId.replace(",", "");
+        long longProjId = Long.parseLong(projectId);
+
+        ArrayList<String> platformNames = new ArrayList<>();
+
+        platformNames.add(PlatformName.YOU_TUBE.name());
+        platformNames.add(PlatformName.REDDIT.name());
+        platformNames.add(PlatformName.TWITTER.name());
+
+        model.addAttribute("sources", platformNames);
+        model.addAttribute("projectId", longProjId);
+
+        return "sources";
+    }
+
+    @PostMapping("/panel/results/{projectId}/{mentionId}")
+    public String deleteMention(@PathVariable String projectId, @PathVariable String mentionId) {
+        projectId = projectId.replace(",", "");
+        long longProjId = Long.parseLong(projectId);
+
+        mentionId = mentionId.replace(",", "");
+        long longMentionId = Long.parseLong(mentionId);
+
+        Optional<TwitterData> twitterData = twitterDataRepo.findById(longMentionId);
+        Optional<RedditData> redditData = redditDataRepo.findById(longMentionId);
+        Optional<YTData> ytData = ytDataRepo.findById(longMentionId);
+
+        twitterData.ifPresent(twitterDataRepo::delete);
+        redditData.ifPresent(redditDataRepo::delete);
+        ytData.ifPresent(ytDataRepo::delete);
+
+        return "redirect:/panel/results/" + longProjId;
     }
 
     private static class WordCloudData {

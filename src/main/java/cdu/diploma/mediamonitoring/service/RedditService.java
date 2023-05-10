@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -76,10 +77,16 @@ public class RedditService {
                 if (subDate.before(myDate)) {
                     continue;
                 }
+                String overEighteen = post.get("over_18").getAsString();
+                boolean isOverEighteen = Boolean.parseBoolean(overEighteen);
+                if (isOverEighteen) {
+                    continue;
+                }
 
                 String siteSubRedditName = post.get("subreddit").getAsString();
+                String subredditSubscribers = post.get("subreddit_subscribers").getAsString();
+                BigInteger subSubscribers = new BigInteger(subredditSubscribers);
 
-                //RedditData redditData = new RedditData(subId, subTitle, subBody, subDate, permalink, siteSubRedditName, socialMediaPlatform);
                 RedditData redditData = new RedditData();
                 redditData.setSubId(subId);
                 redditData.setSubTitle(subTitle);
@@ -87,6 +94,7 @@ public class RedditService {
                 redditData.setSubDate(subDate);
                 redditData.setSubUrl(permalink);
                 redditData.setSite(siteSubRedditName);
+                redditData.setSubSubscribers(subSubscribers);
 
                 socialMediaPlatform.setPlatformName(PlatformName.REDDIT.name());
                 redditData.setSocialMediaPlatform(socialMediaPlatform);

@@ -14,6 +14,7 @@
         <link rel="stylesheet" href="/static/css/tabsInMainDashboard.css">
         <link rel="stylesheet" href="/static/css/sentimentChartsCont.css">
         <link rel="stylesheet" href="/static/css/mentionsChartCont.css">
+        <link rel="stylesheet" href="/static/css/wordCloud.css">
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -31,6 +32,7 @@
     <script src="/static/js/sentimentPieGraph.js"></script>
     <script src="/static/js/sentimentOfMentionsChart.js"></script>
     <script src="/static/js/mentionsChart.js"></script>
+    <script src="/static/js/reachChart.js"></script>
     <script src="/static/js/wordCloud.js"></script>
     <script src="/static/js/tabsInMainDashboard.js"></script>
 

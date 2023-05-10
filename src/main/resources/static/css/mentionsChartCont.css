@@ -8,13 +8,13 @@
 }
 
 #mentionsChart {
-    max-width: 70%;
+    max-width: 50%;
     max-height: 100%;
     object-fit: contain;
 }
 
-#word-cloud {
-    max-width: 30%;
+#reachChart {
+    max-width: 50%;
     max-height: 100%;
     object-fit: contain;
 }

@@ -10,4 +10,5 @@ public interface RedditDataRepo extends JpaRepository<RedditData, Long> {
     ArrayList<RedditData> findAllBySocialMediaPlatform(SocialMediaPlatform socialMediaPlatform);
     ArrayList<RedditData> findAllBySocialMediaPlatformOrderBySubDate(SocialMediaPlatform socialMediaPlatform);
     ArrayList<RedditData> findAllBySocialMediaPlatformOrderBySubDateDesc(SocialMediaPlatform socialMediaPlatform);
+    RedditData findRedditDataById(Long id);
 }

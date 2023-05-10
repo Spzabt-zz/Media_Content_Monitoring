@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.math.BigInteger;
 import java.util.Date;
 
 @Entity
@@ -21,7 +22,7 @@ public class RedditData {
     @Temporal(TemporalType.TIMESTAMP)
     private Date subDate;
     private String subUrl;
-    //private String userPostId;
+    private BigInteger subSubscribers;
     private String site;
     private String sentiment;
 
