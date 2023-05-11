@@ -59,6 +59,7 @@
                 <div class="tabs-container" style="height: 500px; overflow: auto;">
                     <div id="tab1" class="tabcontent">
                         <ol class="list-group">
+                            <#if allYTData??>
                             <#list allYTData as yt>
                                 <li class="list-group-item d-flex justify-content-between align-items-start">
                                     <div class="ms-2 me-auto">
@@ -78,11 +79,13 @@
                                     </form>
                                 </li>
                             </#list>
+                            </#if>
                         </ol>
                     </div>
 
                     <div id="tab2" class="tabcontent">
                         <ol class="list-group">
+                            <#if allRedditData??>
                             <#list allRedditData as reddit>
                                 <li class="list-group-item d-flex justify-content-between align-items-start">
                                     <div class="ms-2 me-auto">
@@ -108,11 +111,13 @@
                                     </form>
                                 </li>
                             </#list>
+                            </#if>
                         </ol>
                     </div>
 
                     <div id="tab3" class="tabcontent">
                         <ol class="list-group">
+                            <#if allTwitterData??>
                             <#list allTwitterData as twitter>
                                 <li class="list-group-item d-flex justify-content-between align-items-start">
                                     <div class="ms-2 me-auto">
@@ -132,6 +137,7 @@
                                     </form>
                                 </li>
                             </#list>
+                            </#if>
                         </ol>
                     </div>
                 </div>
