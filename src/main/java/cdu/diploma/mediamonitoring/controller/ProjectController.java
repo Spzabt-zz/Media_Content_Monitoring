@@ -34,9 +34,11 @@ public class ProjectController {
     private final RedditDataRepo redditDataRepo;
     private final TwitterDataRepo twitterDataRepo;
     private final YTDataRepo ytDataRepo;
+    private final ApiCredentialsRepo apiCredentialsRepo;
+    private final UserRepo userRepo;
 
     @Autowired
-    public ProjectController(SocialMediaPlatformRepo socialMediaPlatformRepo, RedditService redditService, TwitterService twitterService, YTService ytService, ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo) {
+    public ProjectController(SocialMediaPlatformRepo socialMediaPlatformRepo, RedditService redditService, TwitterService twitterService, YTService ytService, ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, ApiCredentialsRepo apiCredentialsRepo, UserRepo userRepo) {
         this.socialMediaPlatformRepo = socialMediaPlatformRepo;
         this.redditService = redditService;
         this.twitterService = twitterService;
@@ -45,6 +47,8 @@ public class ProjectController {
         this.redditDataRepo = redditDataRepo;
         this.twitterDataRepo = twitterDataRepo;
         this.ytDataRepo = ytDataRepo;
+        this.apiCredentialsRepo = apiCredentialsRepo;
+        this.userRepo = userRepo;
     }
 
     @GetMapping("/create-project")
@@ -73,16 +77,35 @@ public class ProjectController {
         socialMediaPlatformRepo.save(smp);
         projectRepo.save(project);
 
-        Project projectByUser = projectRepo.findByName(projName);
-        SocialMediaPlatform socialMediaPlatform = projectByUser.getSocialMediaPlatform();
+        //
+//        ApiCredentials apiCredentials = new ApiCredentials();
+//
+//        apiCredentials.setRedditClientId(redditClient);
+//        apiCredentials.setRedditClientSecret(redditClientSecret);
+//
+//        apiCredentials.setTwitterConsumerKey(twitterConsumerKey);
+//        apiCredentials.setTwitterConsumerSecret(twitterConsumerSecret);
+//        apiCredentials.setTwitterAccessToken(twitterAccessToken);
+//        apiCredentials.setTwitterAccessTokenSecret(twitterAccessTokenSecret);
+//
+//        apiCredentials.setYtApiKey(ytApiKey);
+//        apiCredentialsRepo.save(apiCredentials);
+//        user.setApiCredentials(apiCredentials);
+//        userRepo.save(user);
+        //
+
+        //Project projectByUser = projectRepo.findByName(projName);
+        SocialMediaPlatform socialMediaPlatform = project.getSocialMediaPlatform();
 
         String[] brandKeywords = separateKeywords(keys.toString());
 
+        redditService.setUser(user);
+        twitterService.setUser(user);
+        ytService.setUser(user);
         redditService.searchReddit(brandKeywords, socialMediaPlatform);
         twitterService.collectDataForModel(brandKeywords, socialMediaPlatform);
         ytService.getVideoData(brandKeywords, socialMediaPlatform);
-
-        return "redirect:/panel/results/" + projectByUser.getId();
+        return "redirect:/panel/results/" + project.getId();
     }
 
     @PostMapping("/delete-project/{projectId}")

@@ -1,5 +1,7 @@
 package cdu.diploma.mediamonitoring.dto;
 
+import cdu.diploma.mediamonitoring.model.PlatformName;
+
 import java.math.BigInteger;
 
 public class AllDataDto {
@@ -11,8 +13,17 @@ public class AllDataDto {
     private BigInteger twitterFollowerCount;
     private Integer twitterFriendCount;
     private BigInteger youTubeChannelSubscriberCount;
+    private Long redditUps;
+    private Long retweetCount;
+    private Long favoriteCount;
+    private Long ytLikesCount;
+    private BigInteger viewCountOfYTVideo;
+    private PlatformName platformName;
+    private String ytVideoId;
+    private String subUrl;
+    private String twLink;
 
-    public AllDataDto(String date, String sentiment, String text, BigInteger redditSubSubscribers, Integer twitterListedCount, BigInteger twitterFollowerCount, Integer twitterFriendCount, BigInteger youTubeChannelSubscriberCount) {
+    public AllDataDto(String date, String sentiment, String text, BigInteger redditSubSubscribers, Integer twitterListedCount, BigInteger twitterFollowerCount, Integer twitterFriendCount, BigInteger youTubeChannelSubscriberCount, Long redditUps, Long retweetCount, Long favoriteCount, Long ytLikesCount, BigInteger viewCountOfYTVideo, PlatformName platformName, String ytVideoId, String subUrl, String twLink) {
         this.date = date;
         this.sentiment = sentiment;
         this.text = text;
@@ -21,6 +32,15 @@ public class AllDataDto {
         this.twitterFollowerCount = twitterFollowerCount;
         this.twitterFriendCount = twitterFriendCount;
         this.youTubeChannelSubscriberCount = youTubeChannelSubscriberCount;
+        this.redditUps = redditUps;
+        this.retweetCount = retweetCount;
+        this.favoriteCount = favoriteCount;
+        this.ytLikesCount = ytLikesCount;
+        this.viewCountOfYTVideo = viewCountOfYTVideo;
+        this.platformName = platformName;
+        this.ytVideoId = ytVideoId;
+        this.subUrl = subUrl;
+        this.twLink = twLink;
     }
 
     public String getSentiment() {
@@ -85,5 +105,77 @@ public class AllDataDto {
 
     public void setYouTubeChannelSubscriberCount(BigInteger youTubeChannelSubscriberCount) {
         this.youTubeChannelSubscriberCount = youTubeChannelSubscriberCount;
+    }
+
+    public Long getRedditUps() {
+        return redditUps;
+    }
+
+    public void setRedditUps(Long redditUps) {
+        this.redditUps = redditUps;
+    }
+
+    public Long getRetweetCount() {
+        return retweetCount;
+    }
+
+    public void setRetweetCount(Long retweetCount) {
+        this.retweetCount = retweetCount;
+    }
+
+    public Long getFavoriteCount() {
+        return favoriteCount;
+    }
+
+    public void setFavoriteCount(Long favoriteCount) {
+        this.favoriteCount = favoriteCount;
+    }
+
+    public Long getYtLikesCount() {
+        return ytLikesCount;
+    }
+
+    public void setYtLikesCount(Long ytLikesCount) {
+        this.ytLikesCount = ytLikesCount;
+    }
+
+    public BigInteger getViewCountOfYTVideo() {
+        return viewCountOfYTVideo;
+    }
+
+    public void setViewCountOfYTVideo(BigInteger viewCountOfYTVideo) {
+        this.viewCountOfYTVideo = viewCountOfYTVideo;
+    }
+
+    public PlatformName getPlatformName() {
+        return platformName;
+    }
+
+    public void setPlatformName(PlatformName platformName) {
+        this.platformName = platformName;
+    }
+
+    public String getYtVideoId() {
+        return ytVideoId;
+    }
+
+    public void setYtVideoId(String ytVideoId) {
+        this.ytVideoId = ytVideoId;
+    }
+
+    public String getSubUrl() {
+        return subUrl;
+    }
+
+    public void setSubUrl(String subUrl) {
+        this.subUrl = subUrl;
+    }
+
+    public String getTwLink() {
+        return twLink;
+    }
+
+    public void setTwLink(String twLink) {
+        this.twLink = twLink;
     }
 }

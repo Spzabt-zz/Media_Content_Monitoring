@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "project")
@@ -28,6 +29,9 @@ public class Project {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Comparison> comparison;
 
     public Project(String name, String keywords, SocialMediaPlatform socialMediaPlatform, User user) {
         this.name = name;

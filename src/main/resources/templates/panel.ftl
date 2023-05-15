@@ -31,6 +31,13 @@
                         <a href="/delete-project/${project.id}" onclick="this.closest('form').submit();return false;">Delete</a>
                     </form>
                     <a href="/edit-project/${project.id}">Edit</a>
+
+                    <form action="/panel/compare/${project.id}" method="post">
+                        <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                        <a href="/panel/compare/${project.id}"
+                           onclick="this.closest('form').submit();return false;">Add to comparison</a>
+                    </form>
+
                 </td>
             </tr>
         </#list>

@@ -1,13 +1,11 @@
 package cdu.diploma.mediamonitoring.external.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.google.gson.JsonElement;
+import cdu.diploma.mediamonitoring.model.ApiCredentials;
+import cdu.diploma.mediamonitoring.model.User;
+import cdu.diploma.mediamonitoring.repo.ApiCredentialsRepo;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -22,30 +20,31 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 public class RedditApi {
+    private final ApiCredentialsRepo apiCredentialsRepo;
+    private final User user;
 
-    public RedditApi() {
-
+    public RedditApi(ApiCredentialsRepo apiCredentialsRepo, User user) {
+        this.apiCredentialsRepo = apiCredentialsRepo;
+        this.user = user;
     }
 
     public String getAccessToken() {
         OkHttpClient client = new OkHttpClient();
 
+        ApiCredentials apiCredentials = apiCredentialsRepo.findApiCredentialsByUser(user);
         // Retrieve access token using client credentials
         String username = "Spzabt_zz";
         String password = "kLg84146ivW#?";
-        String clientId = "iRYQ2DsX1m3mVNgxMzKT9Q";
-        String clientSecret = "wypbDxOsceTi6tL1DyjjYGQu8kqgkA";
+        //String clientId = "iRYQ2DsX1m3mVNgxMzKT9Q";
+        String clientId = apiCredentials.getRedditClientId();
+        //String clientSecret = "wypbDxOsceTi6tL1DyjjYGQu8kqgkA";
+        String clientSecret = apiCredentials.getRedditClientSecret();
         String accessTokenUrl = "https://www.reddit.com/api/v1/access_token";
 
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();

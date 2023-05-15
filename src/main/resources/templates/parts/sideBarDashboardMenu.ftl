@@ -26,7 +26,7 @@
             </a>
         </li>
         <li>
-            <a href="/panel/comparison/${project.id}">
+            <a href="/panel/compare/${project.id}">
                 <i class='bx bx-git-compare' ></i>
                 <span class="links_name">Comparison</span>
             </a>

@@ -25,6 +25,7 @@ public class RedditData {
     private BigInteger subSubscribers;
     private String site;
     private String sentiment;
+    private Long ups;
 
 
     @ManyToOne

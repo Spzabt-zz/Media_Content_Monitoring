@@ -1,9 +1,9 @@
 package cdu.diploma.mediamonitoring.service;
 
 import cdu.diploma.mediamonitoring.external.api.TwitterApi;
-import cdu.diploma.mediamonitoring.model.PlatformName;
-import cdu.diploma.mediamonitoring.model.SocialMediaPlatform;
-import cdu.diploma.mediamonitoring.model.TwitterData;
+import cdu.diploma.mediamonitoring.model.*;
+import cdu.diploma.mediamonitoring.model.User;
+import cdu.diploma.mediamonitoring.repo.ApiCredentialsRepo;
 import cdu.diploma.mediamonitoring.repo.TwitterDataRepo;
 import org.springframework.stereotype.Service;
 import twitter4j.Twitter;
@@ -20,16 +20,21 @@ import java.util.*;
 public class TwitterService {
     private final TwitterDataRepo twitterDataRepo;
     private final TwitterApi twitterApi;
+    private User user;
+    private final ApiCredentialsRepo apiCredentialsRepo;
 
-    public TwitterService(TwitterDataRepo twitterDataRepo) {
+
+    public TwitterService(TwitterDataRepo twitterDataRepo, ApiCredentialsRepo apiCredentialsRepo) {
         this.twitterDataRepo = twitterDataRepo;
-        twitterApi = new TwitterApi();
+        this.apiCredentialsRepo = apiCredentialsRepo;
+        twitterApi = new TwitterApi(getUser(), apiCredentialsRepo);
     }
 
     public void collectDataForModel(String[] keys, SocialMediaPlatform socialMediaPlatform) {
         //SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(3L);
 
         for (String key : keys) {
+            int counter = 0;
             try {
                 Query query = Query.of(key)
                         .resultType(Query.ResultType.mixed)
@@ -43,8 +48,11 @@ public class TwitterService {
                 for (Status status : result.getTweets()) {
                     System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText() + ":"
                             + status.getCreatedAt());
-
+                    if (counter > 50) {
+                        return;
+                    }
                     saveTweetsInDb(status, keys, socialMediaPlatform);
+                    counter++;
                 }
             } catch (Exception e) {
                 System.err.println("Error occurred while searching tweets: " + e.getMessage());
@@ -84,7 +92,7 @@ public class TwitterService {
                 String link = "https://twitter.com/twitter/statuses/" + id;
                 String tweetText = status.getText();
 
-                if (tweetText.length() > 500) {
+                if (tweetText.length() > 300) {
                     return;
                 }
 
@@ -94,23 +102,13 @@ public class TwitterService {
                 Integer listedCount = status.getUser().getListedCount();
                 Integer verificationStatus = status.getUser().isVerified() ? 1 : 0;
 
+                int retweetCount = status.getRetweetCount();
+                int favoriteCount = status.getFavoriteCount();
+
                 LocalDateTime tweetedAt = status.getCreatedAt();
                 ZonedDateTime zonedDateTime = tweetedAt.atZone(ZoneId.systemDefault());
                 Instant instant = zonedDateTime.toInstant();
                 Date tweetedAtDate = Date.from(instant);
-
-//                TwitterData twitterData = new TwitterData(
-//                        id,
-//                        link,
-//                        tweetText,
-//                        username,
-//                        followerCount,
-//                        friendCount,
-//                        listedCount,
-//                        verificationStatus,
-//                        tweetedAtDate,
-//                        socialMediaPlatform
-//                );
 
                 TwitterData twitterData = new TwitterData();
                 twitterData.setTwId(id);
@@ -122,6 +120,8 @@ public class TwitterService {
                 twitterData.setListedCount(listedCount);
                 twitterData.setVerificationStatus(verificationStatus);
                 twitterData.setTweetedAt(tweetedAtDate);
+                twitterData.setRetweetCount((long) retweetCount);
+                twitterData.setFavoriteCount((long) favoriteCount);
 
                 socialMediaPlatform.setPlatformName(PlatformName.TWITTER.name());
                 twitterData.setSocialMediaPlatform(socialMediaPlatform);
@@ -129,5 +129,13 @@ public class TwitterService {
                 twitterDataRepo.save(twitterData);
             }
         }
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

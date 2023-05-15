@@ -1,16 +1,14 @@
 package cdu.diploma.mediamonitoring.controller;
 
 import cdu.diploma.mediamonitoring.dto.AllDataDto;
-import cdu.diploma.mediamonitoring.dto.MentionsDto;
 import cdu.diploma.mediamonitoring.dto.SentimentDataDto;
 import cdu.diploma.mediamonitoring.model.*;
-import cdu.diploma.mediamonitoring.repo.ProjectRepo;
-import cdu.diploma.mediamonitoring.repo.RedditDataRepo;
-import cdu.diploma.mediamonitoring.repo.TwitterDataRepo;
-import cdu.diploma.mediamonitoring.repo.YTDataRepo;
+import cdu.diploma.mediamonitoring.repo.*;
 import cdu.diploma.mediamonitoring.service.AnalysingService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import cdu.diploma.mediamonitoring.service.RedditService;
+import cdu.diploma.mediamonitoring.service.TwitterService;
+import cdu.diploma.mediamonitoring.service.YTService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -32,14 +30,24 @@ public class DashboardController {
     private final TwitterDataRepo twitterDataRepo;
     private final YTDataRepo ytDataRepo;
     private final AnalysingService analysingService;
+    private final RedditService redditService;
+    private final TwitterService twitterService;
+    private final YTService ytService;
+    private final AnalyseDataRepo analyseDataRepo;
+    private final SocialMediaPlatformRepo socialMediaPlatformRepo;
 
     @Autowired
-    public DashboardController(ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, AnalysingService analysingService) {
+    public DashboardController(ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, AnalysingService analysingService, RedditService redditService, TwitterService twitterService, YTService ytService, AnalyseDataRepo analyseDataRepo, SocialMediaPlatformRepo socialMediaPlatformRepo) {
         this.projectRepo = projectRepo;
         this.redditDataRepo = redditDataRepo;
         this.twitterDataRepo = twitterDataRepo;
         this.ytDataRepo = ytDataRepo;
         this.analysingService = analysingService;
+        this.redditService = redditService;
+        this.twitterService = twitterService;
+        this.ytService = ytService;
+        this.analyseDataRepo = analyseDataRepo;
+        this.socialMediaPlatformRepo = socialMediaPlatformRepo;
     }
 
     @GetMapping("/")
@@ -49,8 +57,9 @@ public class DashboardController {
         return "greeting";
     }
 
+
     @GetMapping("/panel/results/{projectId}")
-    public String mentions(@PathVariable String projectId, @RequestParam(value = "source", required = false) String source, Model model) {
+    public String mentions(@PathVariable String projectId, @RequestParam(value = "source", required = false) String source, Model model) throws Exception {
         Instant start = Instant.now();
 
         projectId = projectId.replace(",", "");
@@ -66,21 +75,54 @@ public class DashboardController {
         ArrayList<SentimentDataDto> sentimentData = new ArrayList<>();
         HashSet<String> dates = new HashSet<>();
         ArrayList<AllDataDto> allData = analysingService.getAllDataDtos(socialMediaPlatform, dates, source);
+        AnalyseData analyseData = new AnalyseData();
 
-        analysingService.sentimentDataChart(model, sentimentData, dates, allData);
+        analysingService.sentimentDataChart(model, sentimentData, dates, allData, analyseData);
 
-        analysingService.sentimentPieGraph(model, allData);
+        analysingService.sentimentPieGraph(model, allData, analyseData);
 
-        analysingService.totalMentionsCountChart(model, dates, allData);
+        analysingService.totalMentionsCountChart(model, dates, allData, analyseData);
 
-        analysingService.wordCloudGeneration(model, allData);
+        analysingService.wordCloudGeneration(model, allData, analyseData);
 
-        analysingService.reachAnalysis(model, dates, allData);
+        analysingService.reachAnalysis(model, dates, allData, analyseData);
+
+        analyseData.setSocialMediaPlatform(socialMediaPlatform);
+        analyseDataRepo.save(analyseData);
+        socialMediaPlatform.setAnalyseData(analyseData);
+        socialMediaPlatformRepo.save(socialMediaPlatform);
 
         Instant end = Instant.now();
         System.out.println(Duration.between(start, end));
 
         return "mainDashboard";
+    }
+
+    @GetMapping("/panel/analysis/{projectId}")
+    public String analysing(@PathVariable String projectId, Model model) {
+
+        projectId = projectId.replace(",", "");
+        Long longProjId = Long.valueOf(projectId);
+
+        Project project = projectRepo.findProjectById(longProjId);
+        SocialMediaPlatform socialMediaPlatform = project.getSocialMediaPlatform();
+
+        HashSet<String> dates = new HashSet<>();
+        ArrayList<AllDataDto> allData = analysingService.getAllDataDtos(socialMediaPlatform, dates, PlatformName.NONE.name());
+
+        model.addAttribute("totalReachCount", analysingService.totalReachCount(allData, dates));
+        model.addAttribute("totalMentionCount", analysingService.totalMentionsCount(allData));
+        model.addAttribute("totalRepostCount", analysingService.retweetTotalCount(allData));
+        model.addAttribute("totalLikesCount", analysingService.likeCount(allData));
+        model.addAttribute("totalPositiveCount", analysingService.positiveCount(allData));
+        model.addAttribute("totalNegativeCount", analysingService.negativeCount(allData));
+        model.addAttribute("popularMentions", analysingService.mostPopularMentions(allData));
+
+        analysingService.countOfMentionsBySources(allData, model);
+
+        model.addAttribute("project", project);
+
+        return "analysis";
     }
 
     @GetMapping("/panel")
@@ -97,6 +139,8 @@ public class DashboardController {
         projectId = projectId.replace(",", "");
         long longProjId = Long.parseLong(projectId);
 
+        Project project = projectRepo.findProjectById(longProjId);
+
         ArrayList<String> platformNames = new ArrayList<>();
 
         platformNames.add(PlatformName.YOU_TUBE.name());
@@ -104,7 +148,7 @@ public class DashboardController {
         platformNames.add(PlatformName.TWITTER.name());
 
         model.addAttribute("sources", platformNames);
-        model.addAttribute("projectId", longProjId);
+        model.addAttribute("project", project);
 
         return "sources";
     }
@@ -126,6 +170,23 @@ public class DashboardController {
         ytData.ifPresent(ytDataRepo::delete);
 
         return "redirect:/panel/results/" + longProjId;
+    }
+
+    @NotNull
+    private String[] separateKeywords(String keywords) {
+        String[] keys = keywords.split(",");
+
+        for (int i = 0; i < keys.length; i++) {
+            if (Objects.equals(keys[i], " "))
+                break;
+            else
+                keys[i] = keys[i].trim();
+        }
+
+        String[] newKeys = new String[keys.length - 1];
+        System.arraycopy(keys, 0, newKeys, 0, keys.length - 1);
+
+        return newKeys;
     }
 
     private static class WordCloudData {

@@ -31,13 +31,23 @@ public class User implements UserDetails {
     @NotBlank(message = "Password cannot be empty")
     private String password;
 
-    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user"/*,  cascade = CascadeType.ALL*//*, orphanRemoval = true*/, fetch = FetchType.LAZY)
     private List<Project> projects;
+
+//    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private ApiCredentials apiCredentials;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "api_credentials_id")
+    private ApiCredentials apiCredentials;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Comparison> comparison;
 
     public User(String name, String password, Set<Role> roles) {
         this.username = name;

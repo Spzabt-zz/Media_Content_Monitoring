@@ -20,6 +20,10 @@ public class SocialMediaPlatform {
     @OneToOne(mappedBy = "socialMediaPlatform", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Project project;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "analyse_data_id")
+    private AnalyseData analyseData;
+
     @OneToMany(mappedBy = "socialMediaPlatform", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<TwitterData> twitterData;
 

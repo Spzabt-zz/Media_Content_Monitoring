@@ -4,6 +4,8 @@ import cdu.diploma.mediamonitoring.external.api.RedditApi;
 import cdu.diploma.mediamonitoring.model.PlatformName;
 import cdu.diploma.mediamonitoring.model.RedditData;
 import cdu.diploma.mediamonitoring.model.SocialMediaPlatform;
+import cdu.diploma.mediamonitoring.model.User;
+import cdu.diploma.mediamonitoring.repo.ApiCredentialsRepo;
 import cdu.diploma.mediamonitoring.repo.RedditDataRepo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.JsonArray;
@@ -28,11 +30,19 @@ import java.util.stream.Collectors;
 public class RedditService {
     private final RedditApi redditApi;
     private final RedditDataRepo redditDataRepo;
+    private final ApiCredentialsRepo apiCredentialsRepo;
+
+    public User getUser() {
+        return user;
+    }
+
+    private User user;
     private static final String USER_AGENT = "Praw1 by u/Spzabt_zz";
 
-    public RedditService(RedditDataRepo redditDataRepo) throws JsonProcessingException {
+    public RedditService(RedditDataRepo redditDataRepo, ApiCredentialsRepo apiCredentialsRepo) throws JsonProcessingException {
         this.redditDataRepo = redditDataRepo;
-        redditApi = new RedditApi();
+        this.apiCredentialsRepo = apiCredentialsRepo;
+        redditApi = new RedditApi(apiCredentialsRepo, getUser());
     }
 
     //todo: get rid of duplicates when retrieving data
@@ -64,6 +74,7 @@ public class RedditService {
             JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
             JsonArray postsArray = jsonObject.getAsJsonObject("data").getAsJsonArray("children");
 
+            int counter = 0;
             for (JsonElement postElement : postsArray) {
                 JsonObject post = postElement.getAsJsonObject().getAsJsonObject("data");
                 String permalink = "https://www.reddit.com" + post.get("permalink").getAsString();
@@ -82,10 +93,21 @@ public class RedditService {
                 if (isOverEighteen) {
                     continue;
                 }
+                if (subTitle.length() > 300) {
+                    continue;
+                }
+                if (subBody.length() > 300) {
+                    continue;
+                }
+                if (counter > 50) {
+                    continue;
+                }
 
                 String siteSubRedditName = post.get("subreddit").getAsString();
                 String subredditSubscribers = post.get("subreddit_subscribers").getAsString();
                 BigInteger subSubscribers = new BigInteger(subredditSubscribers);
+                String ups = post.get("ups").getAsString();
+                Long longUps = Long.valueOf(ups);
 
                 RedditData redditData = new RedditData();
                 redditData.setSubId(subId);
@@ -95,6 +117,7 @@ public class RedditService {
                 redditData.setSubUrl(permalink);
                 redditData.setSite(siteSubRedditName);
                 redditData.setSubSubscribers(subSubscribers);
+                redditData.setUps(longUps);
 
                 socialMediaPlatform.setPlatformName(PlatformName.REDDIT.name());
                 redditData.setSocialMediaPlatform(socialMediaPlatform);
@@ -102,9 +125,14 @@ public class RedditService {
                 redditDataRepo.save(redditData);
 
                 permalinkList.add(permalink);
+                counter++;
             }
         }
 
         return permalinkList.stream().distinct().collect(Collectors.toList());
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

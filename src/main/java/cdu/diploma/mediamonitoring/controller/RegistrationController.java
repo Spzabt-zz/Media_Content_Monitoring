@@ -1,16 +1,18 @@
 package cdu.diploma.mediamonitoring.controller;
 
+import cdu.diploma.mediamonitoring.model.ApiCredentials;
 import cdu.diploma.mediamonitoring.model.User;
+import cdu.diploma.mediamonitoring.repo.ApiCredentialsRepo;
+import cdu.diploma.mediamonitoring.repo.UserRepo;
 import cdu.diploma.mediamonitoring.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -20,7 +22,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.Map;
 
@@ -28,11 +32,17 @@ import java.util.Map;
 public class RegistrationController {
     private AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final ApiCredentialsRepo apiCredentialsRepo;
+    private final UserRepo userRepo;
+    private final EntityManager entityManager;
 
     @Autowired
-    public RegistrationController(UserService userService, RestTemplate restTemplate, AuthenticationManager authenticationManager) {
+    public RegistrationController(UserService userService, RestTemplate restTemplate, AuthenticationManager authenticationManager, ApiCredentialsRepo apiCredentialsRepo, UserRepo userRepo, EntityManager entityManager) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
+        this.apiCredentialsRepo = apiCredentialsRepo;
+        this.userRepo = userRepo;
+        this.entityManager = entityManager;
     }
 
     @GetMapping("/registration")
@@ -83,6 +93,48 @@ public class RegistrationController {
         } catch (AuthenticationException e) {
             e.printStackTrace();
         }
+
+        return "redirect:/credentials";
+    }
+
+    @GetMapping("/credentials")
+    public String apiKeys() {
+        return "addCredentials";
+    }
+
+    @PostMapping("/credentials")
+    @Transactional
+    public String addApiKeys(
+            @AuthenticationPrincipal User user,
+            @RequestParam("redditClient") String redditClient,
+            @RequestParam("redditClientSecret") String redditClientSecret,
+            @RequestParam("twitterConsumerKey") String twitterConsumerKey,
+            @RequestParam("twitterConsumerSecret") String twitterConsumerSecret,
+            @RequestParam("twitterAccessToken") String twitterAccessToken,
+            @RequestParam("twitterAccessTokenSecret") String twitterAccessTokenSecret,
+            @RequestParam("ytApiKey") String ytApiKey) {
+
+        ApiCredentials apiCredentials = new ApiCredentials();
+
+        //if (re)
+
+        apiCredentials.setRedditClientId(redditClient);
+        apiCredentials.setRedditClientSecret(redditClientSecret);
+
+        apiCredentials.setTwitterConsumerKey(twitterConsumerKey);
+        apiCredentials.setTwitterConsumerSecret(twitterConsumerSecret);
+        apiCredentials.setTwitterAccessToken(twitterAccessToken);
+        apiCredentials.setTwitterAccessTokenSecret(twitterAccessTokenSecret);
+
+        apiCredentials.setYtApiKey(ytApiKey);
+        //apiCredentials.setUser(user);
+        apiCredentialsRepo.save(apiCredentials);
+
+        // Merge the user entity back into the persistence context
+        //user = entityManager.merge(user);
+        user.setApiCredentials(apiCredentials);
+
+        userRepo.save(user);
 
         return "redirect:/create-project";
     }

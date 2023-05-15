@@ -1,4 +1,4 @@
-package cdu.diploma.mediamonitoring.external.api;
+package cdu.diploma.mediamonitoring.nlp.pipeline;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 

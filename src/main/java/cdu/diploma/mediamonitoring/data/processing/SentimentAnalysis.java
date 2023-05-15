@@ -3,8 +3,9 @@ package cdu.diploma.mediamonitoring.data.processing;
 import cdu.diploma.mediamonitoring.dto.AllDataDto;
 import cdu.diploma.mediamonitoring.dto.SentimentDataDto;
 import cdu.diploma.mediamonitoring.dto.SentimentPieDto;
-import cdu.diploma.mediamonitoring.external.api.Pipeline;
+import cdu.diploma.mediamonitoring.nlp.pipeline.Pipeline;
 import cdu.diploma.mediamonitoring.model.*;
+import cdu.diploma.mediamonitoring.repo.AnalyseDataRepo;
 import cdu.diploma.mediamonitoring.repo.RedditDataRepo;
 import cdu.diploma.mediamonitoring.repo.TwitterDataRepo;
 import cdu.diploma.mediamonitoring.repo.YTDataRepo;
@@ -26,11 +27,13 @@ public class SentimentAnalysis {
     private final RedditDataRepo redditDataRepo;
     private final TwitterDataRepo twitterDataRepo;
     private final YTDataRepo ytDataRepo;
+    private final AnalyseDataRepo analyseDataRepo;
 
-    public SentimentAnalysis(RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo) {
+    public SentimentAnalysis(RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, AnalyseDataRepo analyseDataRepo) {
         this.redditDataRepo = redditDataRepo;
         this.twitterDataRepo = twitterDataRepo;
         this.ytDataRepo = ytDataRepo;
+        this.analyseDataRepo = analyseDataRepo;
     }
 
     private String doSentimentAnalysis(String message) {
@@ -157,7 +160,7 @@ public class SentimentAnalysis {
         }));
     }
 
-    public void sentimentDataChart(Model model, ArrayList<SentimentDataDto> sentimentData, HashSet<String> dates, ArrayList<AllDataDto> allData) {
+    public void sentimentDataChart(Model model, ArrayList<SentimentDataDto> sentimentData, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         int posCount = 0;
         int negCount = 0;
         for (String date : dates) {
@@ -186,12 +189,14 @@ public class SentimentAnalysis {
         try {
             String json = mapper.writeValueAsString(sentimentData);
             model.addAttribute("sentimentChartData", json);
+
+            analyseData.setSentimentDataChart(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
 
-    public void sentimentPieGraph(Model model, ArrayList<AllDataDto> allData) {
+    public void sentimentPieGraph(Model model, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         ObjectMapper mapper;
         HashSet<String> sentimentPieces = new HashSet<>();
         ArrayList<SentimentPieDto> sentimentPieDtos = new ArrayList<>();
@@ -224,6 +229,7 @@ public class SentimentAnalysis {
         try {
             String json = mapper.writeValueAsString(sentimentPieDtos);
             model.addAttribute("sentimentPieData", json);
+            analyseData.setSentimentPieGraph(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

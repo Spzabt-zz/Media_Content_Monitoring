@@ -6,6 +6,7 @@ import cdu.diploma.mediamonitoring.dto.AllDataDto;
 import cdu.diploma.mediamonitoring.dto.MentionsDto;
 import cdu.diploma.mediamonitoring.dto.SentimentDataDto;
 import cdu.diploma.mediamonitoring.model.*;
+import cdu.diploma.mediamonitoring.repo.AnalyseDataRepo;
 import cdu.diploma.mediamonitoring.repo.RedditDataRepo;
 import cdu.diploma.mediamonitoring.repo.TwitterDataRepo;
 import cdu.diploma.mediamonitoring.repo.YTDataRepo;
@@ -29,13 +30,15 @@ public class AnalysingService {
     private final RedditDataRepo redditDataRepo;
     private final TwitterDataRepo twitterDataRepo;
     private final YTDataRepo ytDataRepo;
+    private final AnalyseDataRepo analyseDataRepo;
 
     @Autowired
-    public AnalysingService(RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo) {
+    public AnalysingService(RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, AnalyseDataRepo analyseDataRepo) {
         this.redditDataRepo = redditDataRepo;
         this.twitterDataRepo = twitterDataRepo;
         this.ytDataRepo = ytDataRepo;
-        sentimentAnalysis = new SentimentAnalysis(redditDataRepo, twitterDataRepo, ytDataRepo);
+        this.analyseDataRepo = analyseDataRepo;
+        sentimentAnalysis = new SentimentAnalysis(redditDataRepo, twitterDataRepo, ytDataRepo, analyseDataRepo);
     }
 
     public void doParallelSentimentAnalysis(Model model, SocialMediaPlatform socialMediaPlatform, String source) {
@@ -65,16 +68,16 @@ public class AnalysingService {
 
         for (TwitterData twitterData : allTwitterData) {
             String formattedDate = sdf.format(twitterData.getTweetedAt());
-            allData.add(new AllDataDto(formattedDate, twitterData.getSentiment(), twitterData.getTweet(), new BigInteger("0"), twitterData.getListedCount(), twitterData.getFollowerCount(), twitterData.getFriendCount(), new BigInteger("0")));
+            allData.add(new AllDataDto(formattedDate, twitterData.getSentiment(), twitterData.getTweet(), new BigInteger("0"), twitterData.getListedCount(), twitterData.getFollowerCount(), twitterData.getFriendCount(), new BigInteger("0"), 0L, twitterData.getRetweetCount(), twitterData.getFavoriteCount(), 0L, new BigInteger("0"), PlatformName.TWITTER, "", "", twitterData.getLink()));
         }
 
         for (RedditData redditData : allRedditData) {
             String formattedDate = sdf.format(redditData.getSubDate());
 
             if (Objects.equals(redditData.getSubBody(), ""))
-                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubTitle(), redditData.getSubSubscribers(), 0, new BigInteger("0"), 0, new BigInteger("0")));
+                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubTitle(), redditData.getSubSubscribers(), 0, new BigInteger("0"), 0, new BigInteger("0"), redditData.getUps(), 0L, 0L, 0L, new BigInteger("0"), PlatformName.REDDIT, "", redditData.getSubUrl(), ""));
             else
-                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubBody(), redditData.getSubSubscribers(), 0, new BigInteger("0"), 0, new BigInteger("0")));
+                allData.add(new AllDataDto(formattedDate, redditData.getSentiment(), redditData.getSubBody(), redditData.getSubSubscribers(), 0, new BigInteger("0"), 0, new BigInteger("0"), redditData.getUps(), 0L, 0L, 0L, new BigInteger("0"), PlatformName.REDDIT, "", redditData.getSubUrl(), ""));
         }
 
         for (YTData ytData : allYTData) {
@@ -93,7 +96,7 @@ public class AnalysingService {
             } else {
                 date = String.valueOf(year + "-" + month + "-" + day);
             }
-            allData.add(new AllDataDto(date, ytData.getSentiment(), ytData.getComment(), new BigInteger("0"), 0, new BigInteger("0"), 0, ytData.getSubCount()));
+            allData.add(new AllDataDto(date, ytData.getSentiment(), ytData.getComment(), new BigInteger("0"), 0, new BigInteger("0"), 0, ytData.getSubCount(), 0L, 0L, 0L, ytData.getLikes(), ytData.getViewCountOfVideo(), PlatformName.YOU_TUBE, ytData.getVideoId(), "", ""));
         }
 
         allData.sort(new Comparator<AllDataDto>() {
@@ -109,15 +112,15 @@ public class AnalysingService {
         return allData;
     }
 
-    public void sentimentDataChart(Model model, ArrayList<SentimentDataDto> sentimentData, HashSet<String> dates, ArrayList<AllDataDto> allData) {
-        sentimentAnalysis.sentimentDataChart(model, sentimentData, dates, allData);
+    public void sentimentDataChart(Model model, ArrayList<SentimentDataDto> sentimentData, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+        sentimentAnalysis.sentimentDataChart(model, sentimentData, dates, allData, analyseData);
     }
 
-    public void sentimentPieGraph(Model model, ArrayList<AllDataDto> allData) {
-        sentimentAnalysis.sentimentPieGraph(model, allData);
+    public void sentimentPieGraph(Model model, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+        sentimentAnalysis.sentimentPieGraph(model, allData, analyseData);
     }
 
-    public void totalMentionsCountChart(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData) {
+    public void totalMentionsCountChart(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         ObjectMapper mapper;
         ArrayList<MentionsDto> mentions = new ArrayList<>();
 
@@ -143,12 +146,13 @@ public class AnalysingService {
         try {
             String json = mapper.writeValueAsString(mentions);
             model.addAttribute("mentionChartData", json);
+            analyseData.setTotalMentionsCountChart(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
 
-    public void wordCloudGeneration(Model model, ArrayList<AllDataDto> allData) {
+    public void wordCloudGeneration(Model model, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         ObjectMapper mapper;
         List<Map<String, Object>> words = new ArrayList<>();
 
@@ -165,6 +169,7 @@ public class AnalysingService {
         try {
             String json = mapper.writeValueAsString(wordCloudGenerator.generateWordCloud());
             model.addAttribute("words", json);
+            analyseData.setWordCloudGeneration(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -172,7 +177,7 @@ public class AnalysingService {
         }
     }
 
-    public void reachAnalysis(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData) {
+    public void reachAnalysis(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         ObjectMapper mapper;
         final double TWITTER_WEIGHT = 1.0;
         final double REDDIT_WEIGHT = 1.0;
@@ -181,31 +186,7 @@ public class AnalysingService {
         ArrayList<MentionsDto> smReach = new ArrayList<>();
         for (String date : dates) {
             int reach = 0;
-            Set<Integer> processedAccounts = new HashSet<>();
-            for (AllDataDto allDatum : allData) {
-                if (date.equals(allDatum.getDate())) {
-                    //todo: add views parameter
-                    //todo: fix reach count algo
-                    if (!processedAccounts.contains(allDatum.getTwitterFollowerCount().intValue())
-                            || !processedAccounts.contains(allDatum.getTwitterFriendCount())
-                            || !processedAccounts.contains(allDatum.getTwitterListedCount())) {
-                        reach += allDatum.getTwitterFriendCount() * TWITTER_WEIGHT
-                                + allDatum.getTwitterListedCount() * TWITTER_WEIGHT
-                                + allDatum.getTwitterFollowerCount().intValue() * TWITTER_WEIGHT;
-                        processedAccounts.add(allDatum.getTwitterFollowerCount().intValue());
-                        processedAccounts.add(allDatum.getTwitterFriendCount());
-                        processedAccounts.add(allDatum.getTwitterListedCount());
-                    }
-                    if (!processedAccounts.contains(allDatum.getRedditSubSubscribers().intValue())) {
-                        reach += allDatum.getRedditSubSubscribers().intValue() * REDDIT_WEIGHT;
-                        processedAccounts.add(allDatum.getRedditSubSubscribers().intValue());
-                    }
-                    if (!processedAccounts.contains(allDatum.getYouTubeChannelSubscriberCount().intValue())) {
-                        reach += allDatum.getYouTubeChannelSubscriberCount().intValue() * YOUTUBE_WEIGHT;
-                        processedAccounts.add(allDatum.getYouTubeChannelSubscriberCount().intValue());
-                    }
-                }
-            }
+            reach = getReach(allData, TWITTER_WEIGHT, REDDIT_WEIGHT, YOUTUBE_WEIGHT, reach, date);
             smReach.add(new MentionsDto(date, reach));
         }
 
@@ -219,9 +200,171 @@ public class AnalysingService {
         try {
             String json = mapper.writeValueAsString(smReach);
             model.addAttribute("reachChartData", json);
+            analyseData.setReachAnalysis(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
 
+    public int totalMentionsCount(ArrayList<AllDataDto> allData) {
+        int total = 0;
+
+        for (AllDataDto allDatum : allData) {
+            total++;
+        }
+
+        return total;
+    }
+
+    public long totalReachCount(ArrayList<AllDataDto> allData, HashSet<String> dates) {
+        final double TWITTER_WEIGHT = 1.0;
+        final double REDDIT_WEIGHT = 1.0;
+        final double YOUTUBE_WEIGHT = 1.0;
+
+        int reach = 0;
+        for (String date : dates) {
+            reach = getReach(allData, TWITTER_WEIGHT, REDDIT_WEIGHT, YOUTUBE_WEIGHT, reach, date);
+        }
+
+        return reach;
+    }
+
+    public long retweetTotalCount(ArrayList<AllDataDto> allData) {
+        long retweetCount = 0;
+
+        for (AllDataDto allDatum : allData) {
+            retweetCount += allDatum.getRetweetCount();
+        }
+
+        return retweetCount;
+    }
+
+    public long likeCount(ArrayList<AllDataDto> allData) {
+        long likes = 0;
+
+        for (AllDataDto allDatum : allData) {
+            likes += allDatum.getYtLikesCount() + allDatum.getRedditUps() + allDatum.getYtLikesCount();
+        }
+
+        return likes;
+    }
+
+    public long positiveCount(ArrayList<AllDataDto> allData) {
+        long positiveCount = 0;
+
+        for (AllDataDto allDatum : allData) {
+            if (Objects.equals(allDatum.getSentiment(), "Positive")) {
+                positiveCount++;
+            }
+        }
+
+        return positiveCount;
+    }
+
+    public long negativeCount(ArrayList<AllDataDto> allData) {
+        long negativeCount = 0;
+
+        for (AllDataDto allDatum : allData) {
+            if (Objects.equals(allDatum.getSentiment(), "Negative")) {
+                negativeCount++;
+            }
+        }
+
+        return negativeCount;
+    }
+
+    public List<AllDataDto> mostPopularMentions(ArrayList<AllDataDto> allData) {
+//        ArrayList<AllDataDto> popMentions = new ArrayList<>();
+//
+//        for (AllDataDto allDatum : allData) {
+//            BigInteger viewCountOfYTVideo = allDatum.getViewCountOfYTVideo();
+//            Long redditUps = allDatum.getRedditUps();
+//            Long favoriteCount = allDatum.getFavoriteCount();
+//            AllDataDto newData = new AllDataDto(allDatum);
+//            popMentions.add(newData);
+//        }
+
+        allData.sort(new Comparator<AllDataDto>() {
+            public int compare(AllDataDto a, AllDataDto b) {
+                int cmp = b.getViewCountOfYTVideo().compareTo(a.getViewCountOfYTVideo());
+                if (cmp == 0) {
+                    cmp = b.getRedditUps().compareTo(a.getRedditUps());
+                    if (cmp == 0) {
+                        cmp = b.getFavoriteCount().compareTo(a.getFavoriteCount());
+                    }
+                }
+                return cmp;
+            }
+        });
+
+        return allData;
+    }
+
+    public void countOfMentionsBySources(ArrayList<AllDataDto> allData, Model model) {
+        ObjectMapper mapper;
+
+        int redCount = 0;
+        int twCount = 0;
+        int ytCount = 0;
+
+        List<Map<String, Object>> mentionsByCount = new ArrayList<>();
+
+        for (AllDataDto allDatum : allData) {
+            if (allDatum.getPlatformName().name().equals(PlatformName.TWITTER.name())) {
+                twCount++;
+            }
+            if (allDatum.getPlatformName().name().equals(PlatformName.REDDIT.name())) {
+                redCount++;
+            }
+            if (allDatum.getPlatformName().name().equals(PlatformName.YOU_TUBE.name())) {
+                ytCount++;
+            }
+        }
+
+        int totalSentimentPieces = allData.size();
+
+        double percentageRedCount = (double) redCount / totalSentimentPieces * 100.0;
+        double percentageTwCount = (double) twCount / totalSentimentPieces * 100.0;
+        double percentageYtCount = (double) ytCount / totalSentimentPieces * 100.0;
+
+        mentionsByCount.add(Map.of("source", "Reddit", "countOfMentions", Math.floor(percentageRedCount)));
+        mentionsByCount.add(Map.of("source", "Twitter", "countOfMentions", Math.floor(percentageTwCount)));
+        mentionsByCount.add(Map.of("source", "YouTube", "countOfMentions", Math.floor(percentageYtCount)));
+
+        mapper = new ObjectMapper();
+
+        try {
+            String json = mapper.writeValueAsString(mentionsByCount);
+            model.addAttribute("mentionsBySourcePieData", json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int getReach(ArrayList<AllDataDto> allData, double TWITTER_WEIGHT, double REDDIT_WEIGHT, double YOUTUBE_WEIGHT, int reach, String date) {
+        Set<Integer> processedAccounts = new HashSet<>();
+        for (AllDataDto allDatum : allData) {
+            if (date.equals(allDatum.getDate())) {
+                if (!processedAccounts.contains(allDatum.getTwitterFollowerCount().intValue())
+                        || !processedAccounts.contains(allDatum.getTwitterFriendCount())
+                        || !processedAccounts.contains(allDatum.getTwitterListedCount())) {
+                    reach += allDatum.getTwitterFriendCount() * TWITTER_WEIGHT
+                            + allDatum.getTwitterListedCount() * TWITTER_WEIGHT
+                            + allDatum.getTwitterFollowerCount().intValue() * TWITTER_WEIGHT;
+                    processedAccounts.add(allDatum.getTwitterFollowerCount().intValue());
+                    processedAccounts.add(allDatum.getTwitterFriendCount());
+                    processedAccounts.add(allDatum.getTwitterListedCount());
+                }
+                if (!processedAccounts.contains(allDatum.getRedditSubSubscribers().intValue())) {
+                    reach += allDatum.getRedditSubSubscribers().intValue() * REDDIT_WEIGHT;
+                    processedAccounts.add(allDatum.getRedditSubSubscribers().intValue());
+                }
+                if (!processedAccounts.contains(allDatum.getYouTubeChannelSubscriberCount().intValue())) {
+                    reach += allDatum.getYouTubeChannelSubscriberCount().intValue() * YOUTUBE_WEIGHT;
+                    processedAccounts.add(allDatum.getYouTubeChannelSubscriberCount().intValue());
+                }
+            }
+        }
+        return reach;
+    }
 }

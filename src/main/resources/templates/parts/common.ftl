@@ -11,6 +11,10 @@
         <link rel="stylesheet" href="/static/css/sidebar.css"/>
         <link rel="stylesheet" href="/static/css/greeting.css"/>
         <link rel="stylesheet" href="/static/css/auth.css"/>
+<#--        <link rel="stylesheet" href="/static/css/sentimentChartsCont.css"/>-->
+<#--        <link rel="stylesheet" href="/static/css/mentionsChartCont.css"/>-->
+        <link rel="stylesheet" href="/static/css/auth.css"/>
+<#--        <link rel="stylesheet" href="/static/css/comparison.css"/>-->
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
         <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
@@ -19,6 +23,12 @@
         <script src="https://kit.fontawesome.com/fe369707df.js" crossorigin="anonymous"></script>
         <script type="text/javascript" src="https://unpkg.com/react/umd/react.production.min.js"></script>
         <script type="text/javascript" src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.min.js"></script>
     </head>
     <body>
     <#include "navbar.ftl">

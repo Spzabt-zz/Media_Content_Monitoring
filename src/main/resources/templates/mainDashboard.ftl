@@ -8,6 +8,7 @@
         <nav>
             <div class="sidebar-button">
                 <i class='bx bx-menu sidebarBtn'></i>
+                <h3>${project.keywords}</h3>
             </div>
         </nav>
         <div class="home-content">

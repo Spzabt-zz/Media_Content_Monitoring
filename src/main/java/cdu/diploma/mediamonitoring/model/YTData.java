@@ -29,6 +29,7 @@ public class YTData {
     private Integer minutes;
     private Integer seconds;
     private String sentiment;
+    private BigInteger viewCountOfVideo;
 
     @ManyToOne
     @JoinColumn(name = "social_media_platform_id")
