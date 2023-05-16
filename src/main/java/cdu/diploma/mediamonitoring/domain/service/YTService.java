@@ -72,7 +72,7 @@ public class YTService {
                     VideoListResponse videoResponse = ytApi.getYoutubeService().videos()
                             .list("snippet,contentDetails")
                             .setId(videoId)
-                            .setKey(YTApi.API_KEY)
+                            .setKey(ytApi.getCredentials().getYtApiKey())
                             .execute();
 
                     Video video = videoResponse.getItems().get(0);
