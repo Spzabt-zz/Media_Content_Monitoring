@@ -30,23 +30,15 @@ import java.util.stream.Collectors;
 public class RedditService {
     private final RedditApi redditApi;
     private final RedditDataRepo redditDataRepo;
-    private final ApiCredentialsRepo apiCredentialsRepo;
-
-    public User getUser() {
-        return user;
-    }
-
-    private User user;
     private static final String USER_AGENT = "Praw1 by u/Spzabt_zz";
 
     public RedditService(RedditDataRepo redditDataRepo, ApiCredentialsRepo apiCredentialsRepo) throws JsonProcessingException {
         this.redditDataRepo = redditDataRepo;
-        this.apiCredentialsRepo = apiCredentialsRepo;
-        redditApi = new RedditApi(apiCredentialsRepo, getUser());
+        redditApi = new RedditApi(apiCredentialsRepo);
     }
 
     //todo: get rid of duplicates when retrieving data
-    public List<String> searchReddit(String[] keywords, SocialMediaPlatform socialMediaPlatform, User user) throws Exception {
+    public void searchReddit(String[] keywords, SocialMediaPlatform socialMediaPlatform, User user) throws Exception {
         String accessToken = redditApi.getAccessToken(user);
 
         HttpClient client = HttpClient.newBuilder().build();
@@ -129,10 +121,6 @@ public class RedditService {
             }
         }
 
-        return permalinkList.stream().distinct().collect(Collectors.toList());
-    }
-
-    public void setUser(User user) {
-        this.user = user;
+        permalinkList.stream().distinct().collect(Collectors.toList());
     }
 }

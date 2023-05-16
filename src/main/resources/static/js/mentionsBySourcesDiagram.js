@@ -35,6 +35,10 @@
                         font: {
                             size: '23'
                         }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Count of mentions by the sources'
                     }
                 }
             }

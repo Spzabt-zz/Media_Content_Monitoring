@@ -34,8 +34,6 @@ public class ProjectController {
     private final RedditDataRepo redditDataRepo;
     private final TwitterDataRepo twitterDataRepo;
     private final YTDataRepo ytDataRepo;
-    private final ApiCredentialsRepo apiCredentialsRepo;
-    private final UserRepo userRepo;
 
     @Autowired
     public ProjectController(SocialMediaPlatformRepo socialMediaPlatformRepo, RedditService redditService, TwitterService twitterService, YTService ytService, ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, ApiCredentialsRepo apiCredentialsRepo, UserRepo userRepo) {
@@ -47,8 +45,6 @@ public class ProjectController {
         this.redditDataRepo = redditDataRepo;
         this.twitterDataRepo = twitterDataRepo;
         this.ytDataRepo = ytDataRepo;
-        this.apiCredentialsRepo = apiCredentialsRepo;
-        this.userRepo = userRepo;
     }
 
     @GetMapping("/create-project")
@@ -77,31 +73,10 @@ public class ProjectController {
         socialMediaPlatformRepo.save(smp);
         projectRepo.save(project);
 
-        //
-//        ApiCredentials apiCredentials = new ApiCredentials();
-//
-//        apiCredentials.setRedditClientId(redditClient);
-//        apiCredentials.setRedditClientSecret(redditClientSecret);
-//
-//        apiCredentials.setTwitterConsumerKey(twitterConsumerKey);
-//        apiCredentials.setTwitterConsumerSecret(twitterConsumerSecret);
-//        apiCredentials.setTwitterAccessToken(twitterAccessToken);
-//        apiCredentials.setTwitterAccessTokenSecret(twitterAccessTokenSecret);
-//
-//        apiCredentials.setYtApiKey(ytApiKey);
-//        apiCredentialsRepo.save(apiCredentials);
-//        user.setApiCredentials(apiCredentials);
-//        userRepo.save(user);
-        //
-
-        //Project projectByUser = projectRepo.findByName(projName);
         SocialMediaPlatform socialMediaPlatform = project.getSocialMediaPlatform();
 
         String[] brandKeywords = separateKeywords(keys.toString());
 
-        redditService.setUser(user);
-        twitterService.setUser(user);
-        ytService.setUser(user);
         redditService.searchReddit(brandKeywords, socialMediaPlatform, user);
         twitterService.collectDataForModel(brandKeywords, socialMediaPlatform, user);
         ytService.getVideoData(brandKeywords, socialMediaPlatform, user);
@@ -153,20 +128,40 @@ public class ProjectController {
 
     @PostMapping("/edit-project/{projectId}")
     public String editProject(
+            @AuthenticationPrincipal User user,
             @PathVariable String projectId,
             @RequestParam("tags") String keywords,
-            @RequestParam("brand") String projName) {
+            @RequestParam("brand") String projName) throws Exception {
         projectId = projectId.replace(",", "");
         Long longProjId = Long.valueOf(projectId);
 
         Project project = projectRepo.findProjectById(longProjId);
         StringBuilder keys = getKeywordsStringFromJson(keywords);
 
+        boolean isStartSearch = !Objects.equals(project.getKeywords(), keys.toString());
+
         project.setName(projName);
         project.setCreatedAt(new Date());
         project.setKeywords(keys.toString());
 
         projectRepo.save(project);
+
+        String[] brandKeywords = separateKeywords(keys.toString());
+        SocialMediaPlatform socialMediaPlatform = socialMediaPlatformRepo.findByProjectId(project.getId());
+
+        if (isStartSearch) {
+            ArrayList<TwitterData> twitterData = twitterDataRepo.findAllBySocialMediaPlatform(socialMediaPlatform);
+            ArrayList<RedditData> redditData = redditDataRepo.findAllBySocialMediaPlatform(socialMediaPlatform);
+            ArrayList<YTData> ytData = ytDataRepo.findAllBySocialMediaPlatform(socialMediaPlatform);
+
+            twitterDataRepo.deleteAll(twitterData);
+            redditDataRepo.deleteAll(redditData);
+            ytDataRepo.deleteAll(ytData);
+
+            redditService.searchReddit(brandKeywords, socialMediaPlatform, user);
+            twitterService.collectDataForModel(brandKeywords, socialMediaPlatform, user);
+            ytService.getVideoData(brandKeywords, socialMediaPlatform, user);
+        }
 
         return "redirect:/panel";
     }

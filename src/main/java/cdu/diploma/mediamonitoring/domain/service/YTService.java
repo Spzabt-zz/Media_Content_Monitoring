@@ -22,14 +22,11 @@ public class YTService {
     private final YTApi ytApi;
     private final YTDataRepo ytDataRepo;
     private String nextPage_token;
-    private User user;
-    private final ApiCredentialsRepo apiCredentialsRepo;
 
     @Autowired
     public YTService(YTDataRepo ytDataRepo, ApiCredentialsRepo apiCredentialsRepo) {
         this.ytDataRepo = ytDataRepo;
-        this.apiCredentialsRepo = apiCredentialsRepo;
-        ytApi = new YTApi(getUser(), apiCredentialsRepo);
+        ytApi = new YTApi(apiCredentialsRepo);
     }
 
     public void getVideoData(String[] keys, SocialMediaPlatform socialMediaPlatform, User user) throws IOException {
@@ -126,7 +123,7 @@ public class YTService {
                     BigInteger subscriberCount = channel.getStatistics().getSubscriberCount();
                     System.out.println("subscriberCount " + subscriberCount);
 
-                    getComData(videoId, title, categoryId, viewCount, subscriberCount, hours, minutes, seconds, socialMediaPlatform, viewCountOfVideo);
+                    getComData(videoId, title, categoryId, viewCount, subscriberCount, hours, minutes, seconds, socialMediaPlatform, viewCountOfVideo, user);
                 } catch (Exception error) {
                     System.out.println("Something went wrong " + error);
                 }
@@ -135,7 +132,7 @@ public class YTService {
     }
 
     //todo: get rid of duplicates when retrieving data
-    private void getComData(String videoId, String videoTitle, String categoryId, BigInteger viewCount, BigInteger subscriberCount, Integer hours, Integer minutes, Integer seconds, SocialMediaPlatform socialMediaPlatform, BigInteger vieCountOfVideo) {
+    private void getComData(String videoId, String videoTitle, String categoryId, BigInteger viewCount, BigInteger subscriberCount, Integer hours, Integer minutes, Integer seconds, SocialMediaPlatform socialMediaPlatform, BigInteger vieCountOfVideo, User user) {
         System.out.println("from comment data");
 
         int counter = 0;
@@ -196,13 +193,5 @@ public class YTService {
                 e.printStackTrace();
             }
         } while (nextPage_token != null);
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 }

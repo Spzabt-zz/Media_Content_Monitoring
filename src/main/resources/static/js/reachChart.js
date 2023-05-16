@@ -16,6 +16,18 @@
                         tension: 0.3
                     }
                 ]
+            },
+            plugins: [ChartDataLabels],
+            options: {
+                plugins: {
+                    datalabels: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Reach count throughout the time'
+                    }
+                }
             }
         }
     );

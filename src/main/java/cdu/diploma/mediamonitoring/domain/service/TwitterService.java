@@ -24,14 +24,10 @@ import java.util.*;
 public class TwitterService {
     private final TwitterDataRepo twitterDataRepo;
     private final TwitterApi twitterApi;
-    private User user;
-    private final ApiCredentialsRepo apiCredentialsRepo;
-
 
     public TwitterService(TwitterDataRepo twitterDataRepo, ApiCredentialsRepo apiCredentialsRepo) {
         this.twitterDataRepo = twitterDataRepo;
-        this.apiCredentialsRepo = apiCredentialsRepo;
-        twitterApi = new TwitterApi(getUser(), apiCredentialsRepo);
+        twitterApi = new TwitterApi(apiCredentialsRepo);
     }
 
     public void collectDataForModel(String[] keys, SocialMediaPlatform socialMediaPlatform, User user) {
@@ -133,13 +129,5 @@ public class TwitterService {
                 twitterDataRepo.save(twitterData);
             }
         }
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 }

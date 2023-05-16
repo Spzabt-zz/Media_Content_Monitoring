@@ -27,11 +27,9 @@ import java.util.*;
 
 public class RedditApi {
     private final ApiCredentialsRepo apiCredentialsRepo;
-    private final User user;
 
-    public RedditApi(ApiCredentialsRepo apiCredentialsRepo, User user) {
+    public RedditApi(ApiCredentialsRepo apiCredentialsRepo) {
         this.apiCredentialsRepo = apiCredentialsRepo;
-        this.user = user;
     }
 
     public String getAccessToken(User user) {

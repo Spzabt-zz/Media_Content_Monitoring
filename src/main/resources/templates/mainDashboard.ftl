@@ -12,7 +12,7 @@
             </div>
         </nav>
         <div class="home-content">
-
+            
             <div class="chart-container">
                 <canvas id="sentimentPie" width="200" height="200"></canvas>
                 <canvas id="sentimentChart" width="600" height="200"></canvas>

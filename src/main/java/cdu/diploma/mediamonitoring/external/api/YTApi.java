@@ -11,11 +11,9 @@ public class YTApi {
     //public final static String API_KEY = "AIzaSyB8Cx1Rqka876aO1QtkiOcMmjP9cBFFygI";
 
     private final YouTube youtubeService;
-    private final User user;
     private final ApiCredentialsRepo apiCredentialsRepo;
 
-    public YTApi(User user, ApiCredentialsRepo apiCredentialsRepo) {
-        this.user = user;
+    public YTApi(ApiCredentialsRepo apiCredentialsRepo) {
         this.apiCredentialsRepo = apiCredentialsRepo;
         youtubeService = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), null)
                 .setApplicationName("YT-Monitoring")
@@ -27,7 +25,6 @@ public class YTApi {
     }
 
     public ApiCredentials getCredentials(User user) {
-
         return apiCredentialsRepo.findApiCredentialsByUserId(user.getId());
     }
 }

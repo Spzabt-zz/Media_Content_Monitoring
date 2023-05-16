@@ -23,6 +23,18 @@
                     //     tension: 0.3
                     // }
                 ]
+            },
+            plugins: [ChartDataLabels],
+            options: {
+                plugins: {
+                    datalabels: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Mentions count throughout the time'
+                    }
+                }
             }
         }
     );
