@@ -26,8 +26,8 @@ public class YTApi {
         return youtubeService;
     }
 
-    public ApiCredentials getCredentials() {
+    public ApiCredentials getCredentials(User user) {
 
-        return apiCredentialsRepo.findApiCredentialsByUser(user);
+        return apiCredentialsRepo.findApiCredentialsByUserId(user.getId());
     }
 }

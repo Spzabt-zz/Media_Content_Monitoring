@@ -102,9 +102,9 @@ public class ProjectController {
         redditService.setUser(user);
         twitterService.setUser(user);
         ytService.setUser(user);
-        redditService.searchReddit(brandKeywords, socialMediaPlatform);
-        twitterService.collectDataForModel(brandKeywords, socialMediaPlatform);
-        ytService.getVideoData(brandKeywords, socialMediaPlatform);
+        redditService.searchReddit(brandKeywords, socialMediaPlatform, user);
+        twitterService.collectDataForModel(brandKeywords, socialMediaPlatform, user);
+        ytService.getVideoData(brandKeywords, socialMediaPlatform, user);
         return "redirect:/panel/results/" + project.getId();
     }
 

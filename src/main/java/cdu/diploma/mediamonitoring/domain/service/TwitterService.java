@@ -34,7 +34,7 @@ public class TwitterService {
         twitterApi = new TwitterApi(getUser(), apiCredentialsRepo);
     }
 
-    public void collectDataForModel(String[] keys, SocialMediaPlatform socialMediaPlatform) {
+    public void collectDataForModel(String[] keys, SocialMediaPlatform socialMediaPlatform, User user) {
         //SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(3L);
 
         for (String key : keys) {
@@ -46,7 +46,7 @@ public class TwitterService {
                         .since("2023-04-01")
                         .count(100);
 
-                Twitter twitter = twitterApi.getTwitterBuilder();
+                Twitter twitter = twitterApi.getTwitterBuilder(user);
 
                 QueryResult result = twitter.v1().search().search(query);
                 for (Status status : result.getTweets()) {

@@ -32,13 +32,13 @@ public class YTService {
         ytApi = new YTApi(getUser(), apiCredentialsRepo);
     }
 
-    public void getVideoData(String[] keys, SocialMediaPlatform socialMediaPlatform) throws IOException {
+    public void getVideoData(String[] keys, SocialMediaPlatform socialMediaPlatform, User user) throws IOException {
         System.out.println("IN VID DATA");
 
         for (String key : keys) {
             System.out.println("KEY - " + key);
             YouTube.Search.List search = ytApi.getYoutubeService().search().list("id,snippet");
-            search.setKey(ytApi.getCredentials().getYtApiKey());
+            search.setKey(ytApi.getCredentials(user).getYtApiKey());
             search.setType("video");
             search.setMaxResults((long) 5);
             search.setQ(key);
@@ -72,7 +72,7 @@ public class YTService {
                     VideoListResponse videoResponse = ytApi.getYoutubeService().videos()
                             .list("snippet,contentDetails")
                             .setId(videoId)
-                            .setKey(ytApi.getCredentials().getYtApiKey())
+                            .setKey(ytApi.getCredentials(user).getYtApiKey())
                             .execute();
 
                     Video video = videoResponse.getItems().get(0);
@@ -115,7 +115,7 @@ public class YTService {
                     ChannelListResponse channelListResponse = ytApi.getYoutubeService().channels()
                             .list("statistics")
                             .setId(channelId)
-                            .setKey(ytApi.getCredentials().getYtApiKey())
+                            .setKey(ytApi.getCredentials(user).getYtApiKey())
                             .execute();
 
                     Channel channel = channelListResponse.getItems().get(0);
@@ -148,7 +148,7 @@ public class YTService {
                         .setOrder("relevance")
                         .setTextFormat("plainText")
                         .setMaxResults(50L)
-                        .setKey(ytApi.getCredentials().getYtApiKey())
+                        .setKey(ytApi.getCredentials(user).getYtApiKey())
                         .execute();
 
                 nextPage_token = com_thread.getNextPageToken();

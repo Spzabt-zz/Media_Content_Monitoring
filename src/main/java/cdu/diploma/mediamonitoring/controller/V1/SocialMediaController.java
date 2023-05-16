@@ -30,21 +30,22 @@ public class SocialMediaController {
 
     @RequestMapping("/get-yt-data")
     public ResponseEntity getVideoData(@RequestBody String[] keys) throws IOException {
-        ytService.getVideoData(keys, new SocialMediaPlatform());
+        //ytService.getVideoData(keys, new SocialMediaPlatform());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping("/get-tw-data")
     public ResponseEntity getTwitterData(@RequestBody String[] keys) throws IOException {
-        twitterService.collectDataForModel(keys, new SocialMediaPlatform());
+        //twitterService.collectDataForModel(keys, new SocialMediaPlatform());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping("/get-rd-data")
-    public List<String> getRedditData(@RequestBody String[] keys) throws Exception {
+    public ResponseEntity getRedditData(@RequestBody String[] keys) throws Exception {
 
-        return redditService.searchReddit(keys, new SocialMediaPlatform());
+        return new ResponseEntity<>(HttpStatus.OK);
+        //return redditService.searchReddit(keys, new SocialMediaPlatform());
     }
 }

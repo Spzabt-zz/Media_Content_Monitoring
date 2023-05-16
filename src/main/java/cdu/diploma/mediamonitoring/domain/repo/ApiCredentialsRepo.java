@@ -5,5 +5,5 @@ import cdu.diploma.mediamonitoring.domain.model.ApiCredentials;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ApiCredentialsRepo  extends JpaRepository<ApiCredentials, Long> {
-    ApiCredentials findApiCredentialsByUser(User user);
+    ApiCredentials findApiCredentialsByUserId(Long user_id);
 }

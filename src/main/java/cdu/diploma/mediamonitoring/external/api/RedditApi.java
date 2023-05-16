@@ -34,10 +34,10 @@ public class RedditApi {
         this.user = user;
     }
 
-    public String getAccessToken() {
+    public String getAccessToken(User user) {
         OkHttpClient client = new OkHttpClient();
 
-        ApiCredentials apiCredentials = apiCredentialsRepo.findApiCredentialsByUser(user);
+        ApiCredentials apiCredentials = apiCredentialsRepo.findApiCredentialsByUserId(user.getId());
         // Retrieve access token using client credentials
         String username = "Spzabt_zz";
         String password = "kLg84146ivW#?";

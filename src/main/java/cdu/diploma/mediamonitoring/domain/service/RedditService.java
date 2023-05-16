@@ -46,8 +46,8 @@ public class RedditService {
     }
 
     //todo: get rid of duplicates when retrieving data
-    public List<String> searchReddit(String[] keywords, SocialMediaPlatform socialMediaPlatform) throws Exception {
-        String accessToken = redditApi.getAccessToken();
+    public List<String> searchReddit(String[] keywords, SocialMediaPlatform socialMediaPlatform, User user) throws Exception {
+        String accessToken = redditApi.getAccessToken(user);
 
         HttpClient client = HttpClient.newBuilder().build();
         //SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(1L);

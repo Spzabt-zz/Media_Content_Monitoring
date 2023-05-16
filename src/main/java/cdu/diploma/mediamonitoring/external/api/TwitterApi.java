@@ -13,29 +13,29 @@ public class TwitterApi {
     //public final static String CONSUMER_SECRET = "DmsoXAi54OLUzeoNHeejFbiqd7CgHVyXwLvw7wpwyfVXFP6k4p";
     //public final static String ACCESS_TOKEN = "762015787934679041-4fXGdkjodML8RvSsKgOtWzo3Y77QuJD";
     //public final static String ACCESS_TOKEN_SECRET = "4XJgdnBvchC7Jniia0WiaQI0RSKYH26k4tGMYNHJKY6sv";
-    private final Twitter twitter;
+    private Twitter twitter;
 
 
     public TwitterApi(User user, ApiCredentialsRepo apiCredentialsRepo) {
         this.user = user;
         this.apiCredentialsRepo = apiCredentialsRepo;
-        TwitterBuilder twitterBuilder = Twitter.newBuilder();
+
 //        twitter = twitterBuilder
-//                .oAuthConsumer(TwitterApi.CONSUMER_KEY, TwitterApi.CONSUMER_SECRET)
-//                .oAuthAccessToken(TwitterApi.ACCESS_TOKEN, TwitterApi.ACCESS_TOKEN_SECRET)
+//                .oAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET)
+//                .oAuthAccessToken(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 //                .build();
-        twitter = twitterBuilder
-                .oAuthConsumer(getCredentials().getTwitterConsumerKey(), getCredentials().getTwitterConsumerSecret())
-                .oAuthAccessToken(getCredentials().getTwitterAccessToken(), getCredentials().getTwitterAccessTokenSecret())
-                .build();
     }
 
-    public Twitter getTwitterBuilder() {
+    public Twitter getTwitterBuilder(User user) {
+        TwitterBuilder twitterBuilder = Twitter.newBuilder();
+        twitter = twitterBuilder
+                .oAuthConsumer(getCredentials(user).getTwitterConsumerKey(), getCredentials(user).getTwitterConsumerSecret())
+                .oAuthAccessToken(getCredentials(user).getTwitterAccessToken(), getCredentials(user).getTwitterAccessTokenSecret())
+                .build();
         return twitter;
     }
 
-    private ApiCredentials getCredentials() {
-
-        return apiCredentialsRepo.findApiCredentialsByUser(user);
+    private ApiCredentials getCredentials(User user) {
+        return apiCredentialsRepo.findApiCredentialsByUserId(user.getId());
     }
 }
