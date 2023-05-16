@@ -1,8 +1,8 @@
 package cdu.diploma.mediamonitoring.external.api;
 
-import cdu.diploma.mediamonitoring.model.ApiCredentials;
-import cdu.diploma.mediamonitoring.model.User;
-import cdu.diploma.mediamonitoring.repo.ApiCredentialsRepo;
+import cdu.diploma.mediamonitoring.domain.model.ApiCredentials;
+import cdu.diploma.mediamonitoring.domain.model.User;
+import cdu.diploma.mediamonitoring.domain.repo.ApiCredentialsRepo;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;

@@ -52,6 +52,13 @@ create table project
     user_id                  int8,
     primary key (id)
 );
+-- create table keywords
+-- (
+--     id                       int8 not null,
+--     keywords                 varchar(1000),
+--     project_id                  int8,
+--     primary key (id)
+-- );
 create table reddit_data
 (
     id                       int8 not null,

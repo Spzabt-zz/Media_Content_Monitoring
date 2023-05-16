@@ -1,8 +1,8 @@
 package cdu.diploma.mediamonitoring.external.api;
 
-import cdu.diploma.mediamonitoring.model.ApiCredentials;
-import cdu.diploma.mediamonitoring.model.User;
-import cdu.diploma.mediamonitoring.repo.ApiCredentialsRepo;
+import cdu.diploma.mediamonitoring.domain.model.ApiCredentials;
+import cdu.diploma.mediamonitoring.domain.model.User;
+import cdu.diploma.mediamonitoring.domain.repo.ApiCredentialsRepo;
 import twitter4j.Twitter;
 import twitter4j.Twitter.TwitterBuilder;
 
