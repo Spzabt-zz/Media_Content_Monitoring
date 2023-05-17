@@ -4,11 +4,7 @@ import cdu.diploma.mediamonitoring.domain.dto.AllDataDto;
 import cdu.diploma.mediamonitoring.domain.dto.SentimentDataDto;
 import cdu.diploma.mediamonitoring.domain.model.*;
 import cdu.diploma.mediamonitoring.domain.repo.*;
-import cdu.diploma.mediamonitoring.domain.service.AnalysingService;
-import cdu.diploma.mediamonitoring.domain.service.RedditService;
-import cdu.diploma.mediamonitoring.domain.service.TwitterService;
-import cdu.diploma.mediamonitoring.domain.service.YTService;
-import org.jetbrains.annotations.NotNull;
+import cdu.diploma.mediamonitoring.domain.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -18,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -29,24 +26,20 @@ public class DashboardController {
     private final TwitterDataRepo twitterDataRepo;
     private final YTDataRepo ytDataRepo;
     private final AnalysingService analysingService;
-    private final RedditService redditService;
-    private final TwitterService twitterService;
-    private final YTService ytService;
     private final AnalyseDataRepo analyseDataRepo;
     private final SocialMediaPlatformRepo socialMediaPlatformRepo;
+    private final ReportService reportService;
 
     @Autowired
-    public DashboardController(ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, AnalysingService analysingService, RedditService redditService, TwitterService twitterService, YTService ytService, AnalyseDataRepo analyseDataRepo, SocialMediaPlatformRepo socialMediaPlatformRepo) {
+    public DashboardController(ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, AnalysingService analysingService, RedditService redditService, TwitterService twitterService, YTService ytService, AnalyseDataRepo analyseDataRepo, SocialMediaPlatformRepo socialMediaPlatformRepo, ReportService reportService) {
         this.projectRepo = projectRepo;
         this.redditDataRepo = redditDataRepo;
         this.twitterDataRepo = twitterDataRepo;
         this.ytDataRepo = ytDataRepo;
         this.analysingService = analysingService;
-        this.redditService = redditService;
-        this.twitterService = twitterService;
-        this.ytService = ytService;
         this.analyseDataRepo = analyseDataRepo;
         this.socialMediaPlatformRepo = socialMediaPlatformRepo;
+        this.reportService = reportService;
     }
 
     @GetMapping("/")
@@ -171,22 +164,39 @@ public class DashboardController {
         return "redirect:/panel/results/" + longProjId;
     }
 
-    @NotNull
-    private String[] separateKeywords(String keywords) {
-        String[] keys = keywords.split(",");
+    @GetMapping("panel/report/{projectId}")
+    public String getReportPage(@PathVariable String projectId, @AuthenticationPrincipal User user, Model model) {
+        projectId = projectId.replace(",", "");
+        long longProjId = Long.parseLong(projectId);
 
-        for (int i = 0; i < keys.length; i++) {
-            if (Objects.equals(keys[i], " "))
-                break;
-            else
-                keys[i] = keys[i].trim();
-        }
+        Project project = projectRepo.findProjectById(longProjId);
 
-        String[] newKeys = new String[keys.length - 1];
-        System.arraycopy(keys, 0, newKeys, 0, keys.length - 1);
+        ArrayList<Project> projects = (ArrayList<Project>) projectRepo.findAllByUser(user);
 
-        return newKeys;
+        model.addAttribute("projects", projects);
+        model.addAttribute("project", project);
+
+        return "report";
     }
+
+    @PostMapping("panel/report/{projectId}")
+    public void makeReport(@PathVariable String projectId, @AuthenticationPrincipal User user, Model model, HttpServletResponse response) {
+        projectId = projectId.replace(",", "");
+        long longProjId = Long.parseLong(projectId);
+
+        Project project = projectRepo.findProjectById(longProjId);
+
+        ArrayList<Project> projects = (ArrayList<Project>) projectRepo.findAllByUser(user);
+        model.addAttribute("projects", projects);
+        model.addAttribute("project", project);
+        //
+        reportService.generateReport(model, response, project);
+
+        model.addAttribute("messageType", "danger");
+        model.addAttribute("message", "PDF report not generated.");
+    }
+
+
 
     private static class WordCloudData {
         public static List<Map<String, Object>> getWords() {

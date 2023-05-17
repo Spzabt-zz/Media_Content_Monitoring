@@ -160,7 +160,7 @@ public class SentimentAnalysis {
         }));
     }
 
-    public void sentimentDataChart(Model model, ArrayList<SentimentDataDto> sentimentData, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+    public String sentimentDataChart(Model model, ArrayList<SentimentDataDto> sentimentData, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         int posCount = 0;
         int negCount = 0;
         for (String date : dates) {
@@ -189,14 +189,16 @@ public class SentimentAnalysis {
         try {
             String json = mapper.writeValueAsString(sentimentData);
             model.addAttribute("sentimentChartData", json);
-
             analyseData.setSentimentDataChart(json);
+            return json;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+
+        return "no data";
     }
 
-    public void sentimentPieGraph(Model model, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+    public String sentimentPieGraph(Model model, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         ObjectMapper mapper;
         HashSet<String> sentimentPieces = new HashSet<>();
         ArrayList<SentimentPieDto> sentimentPieDtos = new ArrayList<>();
@@ -230,8 +232,12 @@ public class SentimentAnalysis {
             String json = mapper.writeValueAsString(sentimentPieDtos);
             model.addAttribute("sentimentPieData", json);
             analyseData.setSentimentPieGraph(json);
+
+            return json;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+
+        return "no data";
     }
 }

@@ -112,11 +112,16 @@ public class RegistrationController {
             @RequestParam("twitterConsumerSecret") String twitterConsumerSecret,
             @RequestParam("twitterAccessToken") String twitterAccessToken,
             @RequestParam("twitterAccessTokenSecret") String twitterAccessTokenSecret,
-            @RequestParam("ytApiKey") String ytApiKey) {
+            @RequestParam("ytApiKey") String ytApiKey, Model model) {
+        if (redditClient.isEmpty() || redditClientSecret.isEmpty() || twitterConsumerKey.isEmpty()
+        ||twitterConsumerSecret.isEmpty() || twitterAccessToken.isEmpty() || twitterAccessTokenSecret.isEmpty() || ytApiKey.isEmpty()) {
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", "Fields can't be blank.");
+            return "addCredentials";
+        }
 
         ApiCredentials apiCredentials = new ApiCredentials();
 
-        //if (re)
 
         apiCredentials.setRedditClientId(redditClient);
         apiCredentials.setRedditClientSecret(redditClientSecret);
@@ -127,11 +132,9 @@ public class RegistrationController {
         apiCredentials.setTwitterAccessTokenSecret(twitterAccessTokenSecret);
 
         apiCredentials.setYtApiKey(ytApiKey);
-        //apiCredentials.setUser(user);
+
         apiCredentialsRepo.save(apiCredentials);
 
-        // Merge the user entity back into the persistence context
-        //user = entityManager.merge(user);
         user.setApiCredentials(apiCredentials);
 
         userRepo.save(user);

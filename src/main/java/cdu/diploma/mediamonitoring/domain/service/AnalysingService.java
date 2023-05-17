@@ -115,21 +115,19 @@ public class AnalysingService {
         return allData;
     }
 
-    public void sentimentDataChart(Model model, ArrayList<SentimentDataDto> sentimentData, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
-        sentimentAnalysis.sentimentDataChart(model, sentimentData, dates, allData, analyseData);
+    public String sentimentDataChart(Model model, ArrayList<SentimentDataDto> sentimentData, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+        return sentimentAnalysis.sentimentDataChart(model, sentimentData, dates, allData, analyseData);
     }
 
-    public void sentimentPieGraph(Model model, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
-        sentimentAnalysis.sentimentPieGraph(model, allData, analyseData);
+    public String sentimentPieGraph(Model model, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+        return sentimentAnalysis.sentimentPieGraph(model, allData, analyseData);
     }
 
-    public void totalMentionsCountChart(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
-        mentionsAnalysis.totalMentionsAnalysis(model, dates, allData, analyseData);
+    public String totalMentionsCountChart(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+        return mentionsAnalysis.totalMentionsAnalysis(model, dates, allData, analyseData);
     }
 
-
-
-    public void wordCloudGeneration(Model model, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+    public String wordCloudGeneration(Model model, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         ObjectMapper mapper;
         List<Map<String, Object>> words = new ArrayList<>();
 
@@ -147,14 +145,18 @@ public class AnalysingService {
             String json = mapper.writeValueAsString(wordCloudGenerator.generateWordCloud());
             model.addAttribute("words", json);
             analyseData.setWordCloudGeneration(json);
+
+            return json;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+
+        return "no data";
     }
 
-    public void reachAnalysis(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+    public String reachAnalysis(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         ObjectMapper mapper;
         final double TWITTER_WEIGHT = 1.0;
         final double REDDIT_WEIGHT = 1.0;
@@ -178,9 +180,13 @@ public class AnalysingService {
             String json = mapper.writeValueAsString(smReach);
             model.addAttribute("reachChartData", json);
             analyseData.setReachAnalysis(json);
+
+            return json;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+
+        return "no data";
     }
 
     public int totalMentionsCount(ArrayList<AllDataDto> allData) {
@@ -267,6 +273,41 @@ public class AnalysingService {
 
         return allData;
     }
+
+    public List<AllDataDto> mostPopularMentionsForTheReport(ArrayList<AllDataDto> allData) {
+        allData.sort(new Comparator<AllDataDto>() {
+            public int compare(AllDataDto a, AllDataDto b) {
+                int cmp = b.getViewCountOfYTVideo().compareTo(a.getViewCountOfYTVideo());
+                if (cmp == 0) {
+                    cmp = b.getRedditUps().compareTo(a.getRedditUps());
+                    if (cmp == 0) {
+                        cmp = b.getFavoriteCount().compareTo(a.getFavoriteCount());
+                    }
+                }
+                return cmp;
+            }
+        });
+
+        // Escape special characters in the mention variables
+        for (AllDataDto mention : allData) {
+            mention.setYtVideoId(escapeXml(mention.getYtVideoId()));
+            mention.setSubUrl(escapeXml(mention.getSubUrl()));
+            mention.setTwLink(escapeXml(mention.getTwLink()));
+            mention.setSentiment(escapeXml(mention.getSentiment()));
+            mention.setText(escapeXml(mention.getText()));
+        }
+
+        return allData;
+    }
+
+    private String escapeXml(String input) {
+        return input
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;");
+    }
+
 
     public void countOfMentionsBySources(ArrayList<AllDataDto> allData, Model model) {
         mentionsAnalysis.mentionsBySourcesAnalysis(allData, model);

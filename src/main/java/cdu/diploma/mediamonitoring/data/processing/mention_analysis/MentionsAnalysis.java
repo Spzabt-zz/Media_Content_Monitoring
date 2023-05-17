@@ -28,7 +28,7 @@ public class MentionsAnalysis {
         this.analyseDataRepo = analyseDataRepo;
     }
 
-    public void totalMentionsAnalysis(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
+    public String totalMentionsAnalysis(Model model, HashSet<String> dates, ArrayList<AllDataDto> allData, AnalyseData analyseData) {
         ObjectMapper mapper;
         ArrayList<MentionsDto> mentions = new ArrayList<>();
 
@@ -55,9 +55,13 @@ public class MentionsAnalysis {
             String json = mapper.writeValueAsString(mentions);
             model.addAttribute("mentionChartData", json);
             analyseData.setTotalMentionsCountChart(json);
+
+            return json;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+
+        return "no data";
     }
 
     public void mentionsBySourcesAnalysis(ArrayList<AllDataDto> allData, Model model) {

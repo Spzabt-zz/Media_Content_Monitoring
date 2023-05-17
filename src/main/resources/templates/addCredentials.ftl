@@ -2,7 +2,11 @@
 
 
 <@c.page>
-
+    <#if message??>
+        <div class="alert alert-${messageType}" role="alert">
+            ${message}
+        </div>
+    </#if>
     <form action="/credentials" method="post" class="d-flex flex-column">
         <div class="mb-3">
             <label for="redditClientId" class="form-label">Reddit client id</label>

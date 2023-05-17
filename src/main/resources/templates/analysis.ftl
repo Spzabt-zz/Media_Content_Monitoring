@@ -26,7 +26,7 @@
                                 <#list popularMentions as mention>
                                     <li class="list-group-item d-flex justify-content-between align-items-start">
                                         <div class="ms-2 me-auto">
-                                            <div class="fw-bold">All sources</div>
+                                            <div class="fw-bold">${mention.platformName}</div>
                                             <#if mention.ytVideoId != "">
                                                 <a href="https://www.youtube.com/watch?v=${mention.ytVideoId}">${mention.text}</a>
                                             <#elseif mention.subUrl != "">

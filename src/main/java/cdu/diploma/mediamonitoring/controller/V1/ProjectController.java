@@ -1,15 +1,12 @@
 package cdu.diploma.mediamonitoring.controller.V1;
 
-import cdu.diploma.mediamonitoring.domain.dto.KeywordDto;
 import cdu.diploma.mediamonitoring.domain.model.*;
 import cdu.diploma.mediamonitoring.domain.repo.*;
 import cdu.diploma.mediamonitoring.domain.service.RedditService;
+import cdu.diploma.mediamonitoring.domain.service.SearchingService;
 import cdu.diploma.mediamonitoring.domain.service.TwitterService;
 import cdu.diploma.mediamonitoring.domain.service.YTService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jetbrains.annotations.NotNull;
+import cdu.diploma.mediamonitoring.util.KeywordsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 
 @Controller
@@ -34,9 +30,10 @@ public class ProjectController {
     private final RedditDataRepo redditDataRepo;
     private final TwitterDataRepo twitterDataRepo;
     private final YTDataRepo ytDataRepo;
+    private final SearchingService searchMentions;
 
     @Autowired
-    public ProjectController(SocialMediaPlatformRepo socialMediaPlatformRepo, RedditService redditService, TwitterService twitterService, YTService ytService, ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, ApiCredentialsRepo apiCredentialsRepo, UserRepo userRepo) {
+    public ProjectController(SocialMediaPlatformRepo socialMediaPlatformRepo, RedditService redditService, TwitterService twitterService, YTService ytService, ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, ApiCredentialsRepo apiCredentialsRepo, UserRepo userRepo, SearchingService searchMentions) {
         this.socialMediaPlatformRepo = socialMediaPlatformRepo;
         this.redditService = redditService;
         this.twitterService = twitterService;
@@ -45,6 +42,7 @@ public class ProjectController {
         this.redditDataRepo = redditDataRepo;
         this.twitterDataRepo = twitterDataRepo;
         this.ytDataRepo = ytDataRepo;
+        this.searchMentions = searchMentions;
     }
 
     @GetMapping("/create-project")
@@ -56,8 +54,14 @@ public class ProjectController {
     public String createProject(
             @AuthenticationPrincipal User user,
             @RequestParam("tags") String keywords,
-            @RequestParam("brand") String projName) throws Exception {
-        StringBuilder keys = getKeywordsStringFromJson(keywords);
+            @RequestParam("brand") String projName, Model model) throws Exception {
+        if (keywords.isEmpty() || projName.isEmpty()) {
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", "Fields can't be blank.");
+            return  "createNewProject";
+        }
+
+        StringBuilder keys = KeywordsUtil.getKeywordsStringFromJson(keywords);
 
         SocialMediaPlatform smp = new SocialMediaPlatform();
 
@@ -73,13 +77,8 @@ public class ProjectController {
         socialMediaPlatformRepo.save(smp);
         projectRepo.save(project);
 
-        SocialMediaPlatform socialMediaPlatform = project.getSocialMediaPlatform();
+        searchMentions.searchMentions(user, keys, project);
 
-        String[] brandKeywords = separateKeywords(keys.toString());
-
-        redditService.searchReddit(brandKeywords, socialMediaPlatform, user);
-        twitterService.collectDataForModel(brandKeywords, socialMediaPlatform, user);
-        ytService.getVideoData(brandKeywords, socialMediaPlatform, user);
         return "redirect:/panel/results/" + project.getId();
     }
 
@@ -118,7 +117,7 @@ public class ProjectController {
 
         String keywords = project.getKeywords();
 
-        String[] keys = separateKeywords(keywords);
+        String[] keys = KeywordsUtil.separateKeywords(keywords);
 
         model.addAttribute("project", project);
         model.addAttribute("keywords", keys);
@@ -131,12 +130,36 @@ public class ProjectController {
             @AuthenticationPrincipal User user,
             @PathVariable String projectId,
             @RequestParam("tags") String keywords,
-            @RequestParam("brand") String projName) throws Exception {
+            @RequestParam("brand") String projName, Model model) throws Exception {
         projectId = projectId.replace(",", "");
         Long longProjId = Long.valueOf(projectId);
 
         Project project = projectRepo.findProjectById(longProjId);
-        StringBuilder keys = getKeywordsStringFromJson(keywords);
+
+        model.addAttribute("project", project);
+        if (keywords.isEmpty() || projName.isEmpty()) {
+            String keywords1 = project.getKeywords();
+
+            String[] keysForError = KeywordsUtil.separateKeywords(keywords1);
+
+            model.addAttribute("keywords", keysForError);
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", "Fields can't be blank.");
+            return  "projectSettings";
+        }
+
+        StringBuilder keys = KeywordsUtil.getKeywordsStringFromJson(keywords);
+
+        if (Objects.equals(project.getKeywords(), keys.toString())) {
+            String keywords1 = project.getKeywords();
+
+            String[] keysForError = KeywordsUtil.separateKeywords(keywords1);
+
+            model.addAttribute("keywords", keysForError);
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", "Nothing changed.");
+            return  "projectSettings";
+        }
 
         boolean isStartSearch = !Objects.equals(project.getKeywords(), keys.toString());
 
@@ -146,7 +169,7 @@ public class ProjectController {
 
         projectRepo.save(project);
 
-        String[] brandKeywords = separateKeywords(keys.toString());
+        String[] brandKeywords = KeywordsUtil.separateKeywords(keys.toString());
         SocialMediaPlatform socialMediaPlatform = socialMediaPlatformRepo.findByProjectId(project.getId());
 
         if (isStartSearch) {
@@ -163,41 +186,7 @@ public class ProjectController {
             ytService.getVideoData(brandKeywords, socialMediaPlatform, user);
         }
 
-        return "redirect:/panel";
-    }
-
-    @NotNull
-    private StringBuilder getKeywordsStringFromJson(String keywords) {
-        StringBuilder keys = new StringBuilder();
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            List<KeywordDto> keywordList = objectMapper.readValue(keywords, new TypeReference<List<KeywordDto>>() {
-            });
-
-            for (KeywordDto keyword : keywordList) {
-                keys.append(keyword.getValue()).append(", ");
-            }
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return keys;
-    }
-
-    @NotNull
-    private String[] separateKeywords(String keywords) {
-        String[] keys = keywords.split(",");
-
-        for (int i = 0; i < keys.length; i++) {
-            if (Objects.equals(keys[i], " "))
-                break;
-            else
-                keys[i] = keys[i].trim();
-        }
-
-        String[] newKeys = new String[keys.length - 1];
-        System.arraycopy(keys, 0, newKeys, 0, keys.length - 1);
-
-        return newKeys;
+        //return "redirect:/panel";
+        return "redirect:/panel/results/" + project.getId();
     }
 }
