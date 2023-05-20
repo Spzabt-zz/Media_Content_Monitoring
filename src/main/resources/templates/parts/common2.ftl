@@ -15,7 +15,6 @@
         <link rel="stylesheet" href="/static/css/sentimentChartsCont.css"/>
         <link rel="stylesheet" href="/static/css/mentionsChartCont.css"/>
         <link rel="stylesheet" href="/static/css/wordCloud.css"/>
-        <link rel="stylesheet" href="/static/css/loader.css"/>
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'/>
