@@ -42,7 +42,4 @@ public class Project {
     public Project() {
 
     }
-
-    /*@OneToMany(mappedBy = "project", orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Keyword> keywords;*/
 }

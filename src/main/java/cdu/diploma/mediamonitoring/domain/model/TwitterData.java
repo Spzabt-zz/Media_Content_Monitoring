@@ -24,7 +24,7 @@ public class TwitterData {
     private Integer friendCount;
     private Integer listedCount;
     private Integer verificationStatus;
-    //private String tweetForUser;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date tweetedAt;
     private String sentiment;

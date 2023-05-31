@@ -20,9 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.RestTemplate;
 
-import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -30,19 +28,17 @@ import java.util.Map;
 
 @Controller
 public class RegistrationController {
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final ApiCredentialsRepo apiCredentialsRepo;
     private final UserRepo userRepo;
-    private final EntityManager entityManager;
 
     @Autowired
-    public RegistrationController(UserService userService, RestTemplate restTemplate, AuthenticationManager authenticationManager, ApiCredentialsRepo apiCredentialsRepo, UserRepo userRepo, EntityManager entityManager) {
+    public RegistrationController(UserService userService, AuthenticationManager authenticationManager, ApiCredentialsRepo apiCredentialsRepo, UserRepo userRepo) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.apiCredentialsRepo = apiCredentialsRepo;
         this.userRepo = userRepo;
-        this.entityManager = entityManager;
     }
 
     @GetMapping("/registration")
@@ -112,9 +108,14 @@ public class RegistrationController {
             @RequestParam("twitterConsumerSecret") String twitterConsumerSecret,
             @RequestParam("twitterAccessToken") String twitterAccessToken,
             @RequestParam("twitterAccessTokenSecret") String twitterAccessTokenSecret,
-            @RequestParam("ytApiKey") String ytApiKey, Model model) {
+            @RequestParam("ytApiKey") String ytApiKey,
+            @RequestParam("redditUsername") String redditUsername,
+            @RequestParam("redditPassword") String redditPassword,
+            @RequestParam("redditUserAgent") String redditUserAgent,
+            Model model) {
         if (redditClient.isEmpty() || redditClientSecret.isEmpty() || twitterConsumerKey.isEmpty()
-        ||twitterConsumerSecret.isEmpty() || twitterAccessToken.isEmpty() || twitterAccessTokenSecret.isEmpty() || ytApiKey.isEmpty()) {
+        ||twitterConsumerSecret.isEmpty() || twitterAccessToken.isEmpty() || twitterAccessTokenSecret.isEmpty()
+                || ytApiKey.isEmpty() || redditUsername.isEmpty() || redditPassword.isEmpty() || redditUserAgent.isEmpty()) {
             model.addAttribute("messageType", "danger");
             model.addAttribute("message", "Fields can't be blank.");
             return "addCredentials";
@@ -122,9 +123,11 @@ public class RegistrationController {
 
         ApiCredentials apiCredentials = new ApiCredentials();
 
-
         apiCredentials.setRedditClientId(redditClient);
         apiCredentials.setRedditClientSecret(redditClientSecret);
+        apiCredentials.setRedditUsername(redditUsername);
+        apiCredentials.setRedditPassword(redditPassword);
+        apiCredentials.setRedditUserAgent(redditUserAgent);
 
         apiCredentials.setTwitterConsumerKey(twitterConsumerKey);
         apiCredentials.setTwitterConsumerSecret(twitterConsumerSecret);

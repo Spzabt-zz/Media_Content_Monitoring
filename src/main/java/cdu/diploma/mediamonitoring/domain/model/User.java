@@ -34,9 +34,6 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user"/*,  cascade = CascadeType.ALL*//*, orphanRemoval = true*/, fetch = FetchType.LAZY)
     private List<Project> projects;
 
-//    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private ApiCredentials apiCredentials;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "api_credentials_id")
     private ApiCredentials apiCredentials;

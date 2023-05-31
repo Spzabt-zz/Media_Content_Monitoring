@@ -12,7 +12,7 @@
             </div>
         </nav>
         <div class="home-content">
-            
+
             <div class="chart-container">
                 <canvas id="sentimentPie" width="200" height="200"></canvas>
                 <canvas id="sentimentChart" width="600" height="200"></canvas>
@@ -46,13 +46,13 @@
 
             <div class="tab-container">
                 <div class="tab">
-                    <button class="tablinks" onclick="openTab(event, 'tab1')">
+                    <button class="tablinks" onclick="openTab('tab1')">
                         <img src="/static/img/assets/youtube.png"/>
                     </button>
-                    <button class="tablinks" onclick="openTab(event, 'tab2')">
+                    <button class="tablinks" onclick="openTab('tab2')">
                         <img src="/static/img/assets/reddit.png"/>
                     </button>
-                    <button class="tablinks" onclick="openTab(event, 'tab3')">
+                    <button class="tablinks" onclick="openTab('tab3')">
                         <img src="/static/img/assets/twitter.png" height="24" width="24"/>
                     </button>
                 </div>
@@ -110,6 +110,9 @@
                                         <input type="hidden" name="_csrf" value="${_csrf.token}"/>
                                         <a href="/panel/results/${project.id}/${reddit.id}" onclick="this.closest('form').submit();return false;">Delete</a>
                                     </form>
+                                    <img src="/static/img/assets/upvote.png" height="24" width="24"/>
+                                    <br>
+                                    ${reddit.ups}
                                 </li>
                             </#list>
                             </#if>

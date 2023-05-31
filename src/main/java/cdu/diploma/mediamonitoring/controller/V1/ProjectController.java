@@ -77,6 +77,12 @@ public class ProjectController {
         socialMediaPlatformRepo.save(smp);
         projectRepo.save(project);
 
+        if (!redditService.checkRedditApiConnection(user)) {
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", "Connection to reddit API failed");
+            return  "createNewProject";
+        }
+
         searchMentions.searchMentions(user, keys, project);
 
         return "redirect:/panel/results/" + project.getId();
@@ -186,7 +192,6 @@ public class ProjectController {
             ytService.getVideoData(brandKeywords, socialMediaPlatform, user);
         }
 
-        //return "redirect:/panel";
         return "redirect:/panel/results/" + project.getId();
     }
 }

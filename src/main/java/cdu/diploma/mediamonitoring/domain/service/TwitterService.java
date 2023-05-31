@@ -31,8 +31,6 @@ public class TwitterService {
     }
 
     public void collectDataForModel(String[] keys, SocialMediaPlatform socialMediaPlatform, User user) {
-        //SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(3L);
-
         for (String key : keys) {
             int counter = 0;
             try {

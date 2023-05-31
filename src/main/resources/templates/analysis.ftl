@@ -14,7 +14,7 @@
 
             <div class="tab-container">
                 <div class="tab">
-                    <button class="tablinks" onclick="openTab(event, 'tab1')">
+                    <button class="tablinks" onclick="openTab('tab1')">
                         <img src="/static/img/assets/browser.png" height="24" width="24"/>
                     </button>
                 </div>

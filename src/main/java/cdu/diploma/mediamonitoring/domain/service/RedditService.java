@@ -1,9 +1,6 @@
 package cdu.diploma.mediamonitoring.domain.service;
 
-import cdu.diploma.mediamonitoring.domain.model.PlatformName;
-import cdu.diploma.mediamonitoring.domain.model.RedditData;
-import cdu.diploma.mediamonitoring.domain.model.SocialMediaPlatform;
-import cdu.diploma.mediamonitoring.domain.model.User;
+import cdu.diploma.mediamonitoring.domain.model.*;
 import cdu.diploma.mediamonitoring.domain.repo.ApiCredentialsRepo;
 import cdu.diploma.mediamonitoring.domain.repo.RedditDataRepo;
 import cdu.diploma.mediamonitoring.external.api.RedditApi;
@@ -30,19 +27,43 @@ import java.util.stream.Collectors;
 public class RedditService {
     private final RedditApi redditApi;
     private final RedditDataRepo redditDataRepo;
-    private static final String USER_AGENT = "Praw1 by u/Spzabt_zz";
+    private final ApiCredentialsRepo apiCredentialsRepo;
 
-    public RedditService(RedditDataRepo redditDataRepo, ApiCredentialsRepo apiCredentialsRepo) throws JsonProcessingException {
+    public RedditService(RedditDataRepo redditDataRepo, ApiCredentialsRepo apiCredentialsRepo, ApiCredentialsRepo apiCredentialsRepo1) throws JsonProcessingException {
         this.redditDataRepo = redditDataRepo;
         redditApi = new RedditApi(apiCredentialsRepo);
+        this.apiCredentialsRepo = apiCredentialsRepo1;
     }
+
+    public boolean checkRedditApiConnection(User user) {
+        try {
+            String accessToken = redditApi.getAccessToken(user);
+
+            HttpClient client = HttpClient.newBuilder().build();
+
+            ApiCredentials apiCredentials = apiCredentialsRepo.findApiCredentialsByUserId(user.getId());
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://oauth.reddit.com/api/v1/me"))
+                    .header("User-Agent", apiCredentials.getRedditUserAgent())
+                    .header("Authorization", "bearer " + accessToken)
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            int statusCode = response.statusCode();
+
+            return statusCode == 200;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
     //todo: get rid of duplicates when retrieving data
     public void searchReddit(String[] keywords, SocialMediaPlatform socialMediaPlatform, User user) throws Exception {
         String accessToken = redditApi.getAccessToken(user);
 
         HttpClient client = HttpClient.newBuilder().build();
-        //SocialMediaPlatform socialMediaPlatform = new SocialMediaPlatform(1L);
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, 2023);
@@ -50,12 +71,14 @@ public class RedditService {
         cal.set(Calendar.DAY_OF_MONTH, 1);
         Date myDate = cal.getTime();
 
+        ApiCredentials apiCredentials = apiCredentialsRepo.findApiCredentialsByUserId(user.getId());
+
         List<String> permalinkList = new ArrayList<>();
         for (String keyword : keywords) {
             String encodedKeyword = URLEncoder.encode(keyword, "UTF-8");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://oauth.reddit.com/r/all/search.json?q=" + encodedKeyword))
-                    .header("User-Agent", USER_AGENT)
+                    .header("User-Agent", apiCredentials.getRedditUserAgent())
                     .header("Authorization", "bearer " + accessToken)
                     .build();
 

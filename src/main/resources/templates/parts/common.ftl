@@ -11,10 +11,7 @@
         <link rel="stylesheet" href="/static/css/sidebar.css"/>
         <link rel="stylesheet" href="/static/css/greeting.css"/>
         <link rel="stylesheet" href="/static/css/auth.css"/>
-<#--        <link rel="stylesheet" href="/static/css/sentimentChartsCont.css"/>-->
-<#--        <link rel="stylesheet" href="/static/css/mentionsChartCont.css"/>-->
         <link rel="stylesheet" href="/static/css/auth.css"/>
-<#--        <link rel="stylesheet" href="/static/css/comparison.css"/>-->
         <link rel="stylesheet" href="/static/css/spin.css"/>
         <link rel="stylesheet" href="/static/css/stuffForSpinner.css"/>
 

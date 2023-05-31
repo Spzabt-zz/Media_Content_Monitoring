@@ -16,12 +16,10 @@ public class Comparison {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    //@ToString.Exclude
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
-    //@ToString.Exclude
     private Project project;
 
     public Comparison() {

@@ -16,6 +16,9 @@ public class ApiCredentials {
 
     private String redditClientId;
     private String redditClientSecret;
+    private String redditUsername;
+    private String redditPassword;
+    private String redditUserAgent;
 
     private String twitterConsumerKey;
     private String twitterConsumerSecret;
@@ -26,8 +29,4 @@ public class ApiCredentials {
 
     @OneToOne(mappedBy = "apiCredentials", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private User user;
-
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
-//    private User user;
 }

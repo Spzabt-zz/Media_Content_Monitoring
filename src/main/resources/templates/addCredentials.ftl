@@ -16,6 +16,18 @@
             <label for="redditClientSecretId" class="form-label">Reddit client secret</label>
             <input type="text" class="form-control" id="redditClientSecretId" name="redditClientSecret">
         </div>
+        <div class="mb-3">
+            <label for="redditUsernameId" class="form-label">Reddit username</label>
+            <input type="text" class="form-control" id="redditUsernameId" name="redditUsername">
+        </div>
+        <div class="mb-3">
+            <label for="redditPasswordId" class="form-label">Reddit password</label>
+            <input type="text" class="form-control" id="redditPasswordId" name="redditPassword">
+        </div>
+        <div class="mb-3">
+            <label for="redditUserAgentId" class="form-label">Reddit user agent (name of the script)</label>
+            <input type="text" class="form-control" id="redditUserAgentId" name="redditUserAgent">
+        </div>
 
         <div class="mb-3">
             <label for="twitterConsumerKeyId" class="form-label">Twitter consumer key</label>

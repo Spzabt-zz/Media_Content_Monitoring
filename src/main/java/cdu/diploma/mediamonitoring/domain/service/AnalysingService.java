@@ -31,7 +31,6 @@ public class AnalysingService {
     private final RedditDataRepo redditDataRepo;
     private final TwitterDataRepo twitterDataRepo;
     private final YTDataRepo ytDataRepo;
-    private final AnalyseDataRepo analyseDataRepo;
     private final MentionsAnalysis mentionsAnalysis;
 
     @Autowired
@@ -39,7 +38,6 @@ public class AnalysingService {
         this.redditDataRepo = redditDataRepo;
         this.twitterDataRepo = twitterDataRepo;
         this.ytDataRepo = ytDataRepo;
-        this.analyseDataRepo = analyseDataRepo;
         sentimentAnalysis = new SentimentAnalysis(redditDataRepo, twitterDataRepo, ytDataRepo, analyseDataRepo);
         mentionsAnalysis = new MentionsAnalysis(redditDataRepo, twitterDataRepo, ytDataRepo, analyseDataRepo);
     }
@@ -288,7 +286,6 @@ public class AnalysingService {
             }
         });
 
-        // Escape special characters in the mention variables
         for (AllDataDto mention : allData) {
             mention.setYtVideoId(escapeXml(mention.getYtVideoId()));
             mention.setSubUrl(escapeXml(mention.getSubUrl()));

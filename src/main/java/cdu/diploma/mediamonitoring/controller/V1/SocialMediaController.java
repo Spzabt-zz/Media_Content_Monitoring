@@ -1,6 +1,5 @@
 package cdu.diploma.mediamonitoring.controller.V1;
 
-import cdu.diploma.mediamonitoring.domain.model.SocialMediaPlatform;
 import cdu.diploma.mediamonitoring.domain.service.RedditService;
 import cdu.diploma.mediamonitoring.domain.service.TwitterService;
 import cdu.diploma.mediamonitoring.domain.service.YTService;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/dashboard")

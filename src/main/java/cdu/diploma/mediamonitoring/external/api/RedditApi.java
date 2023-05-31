@@ -36,12 +36,10 @@ public class RedditApi {
         OkHttpClient client = new OkHttpClient();
 
         ApiCredentials apiCredentials = apiCredentialsRepo.findApiCredentialsByUserId(user.getId());
-        // Retrieve access token using client credentials
-        String username = "Spzabt_zz";
-        String password = "kLg84146ivW#?";
-        //String clientId = "iRYQ2DsX1m3mVNgxMzKT9Q";
+
+        String username = apiCredentials.getRedditUsername();
+        String password = apiCredentials.getRedditPassword();
         String clientId = apiCredentials.getRedditClientId();
-        //String clientSecret = "wypbDxOsceTi6tL1DyjjYGQu8kqgkA";
         String clientSecret = apiCredentials.getRedditClientSecret();
         String accessTokenUrl = "https://www.reddit.com/api/v1/access_token";
 
@@ -90,49 +88,4 @@ public class RedditApi {
         JsonObject jsonObject = JsonParser.parseString(responseString).getAsJsonObject();
         return jsonObject.get("access_token").getAsString();
     }
-
-//    public String getAuthToken(String[] keywords) throws IOException {
-//        OkHttpClient client = new OkHttpClient();
-//
-//        // Retrieve access token using client credentials
-//        String clientId = "xLc3NDY1obRUKjiycPraiw";
-//        String clientSecret = "o4wkbDEyMyO2z9Si-lUfRx7lzN-ytQ";
-//        String username = "Spzabt_zz";
-//        String password = "YOUR_PASSWORD";
-//        String grantType = "kLg84146ivW#?";
-//        String scope = "read";
-//        String accessTokenUrl = "https://www.reddit.com/api/v1/access_token";
-//        RequestBody formBody = new FormBody.Builder()
-//                .add("grant_type", grantType)
-//                .add("username", username)
-//                .add("password", password)
-//                .build();
-//        Request request = new Request.Builder()
-//                .url(accessTokenUrl)
-//                .header("Authorization", Credentials.basic(clientId, clientSecret))
-//                .post(formBody)
-//                .build();
-//        Response response = client.newCall(request).execute();
-//        String accessToken = response.body().string();
-//
-//        // Search for posts based on keywords
-//        String searchResponseJson = "";
-//        for (String keyword : keywords) {
-//            String subreddit = "all";
-//            String query = keyword;
-//            String sort = "relevance";
-//            String searchUrl = String.format("https://www.reddit.com/r/%s/search.json?q=%s&sort=%s", subreddit, query, sort);
-//            Request searchRequest = new Request.Builder()
-//                    .url(searchUrl)
-//                    .header("Authorization", "Bearer " + accessToken)
-//                    .build();
-//            Response searchResponse = client.newCall(searchRequest).execute();
-//            searchResponseJson = searchResponse.body().string();
-//        }
-//
-//
-//        // Parse search response JSON to retrieve desired data
-//        // ...
-//        return searchResponseJson;
-//    }
 }

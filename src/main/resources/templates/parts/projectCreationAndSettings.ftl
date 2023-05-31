@@ -7,7 +7,6 @@
                        value="<#if !isCreateProjectForm>${project.name}</#if>"/>
             </div>
 
-            <#--            <div class="input-group mb-3">-->
             <#if !isCreateProjectForm>
                 <input name='tags' class="form-control" value="<#list keywords as keyword>${keyword},</#list>"
                        autofocus>

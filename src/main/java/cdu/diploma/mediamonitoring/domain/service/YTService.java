@@ -10,11 +10,15 @@ import cdu.diploma.mediamonitoring.domain.repo.YTDataRepo;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,8 +41,20 @@ public class YTService {
             YouTube.Search.List search = ytApi.getYoutubeService().search().list("id,snippet");
             search.setKey(ytApi.getCredentials(user).getYtApiKey());
             search.setType("video");
-            search.setMaxResults((long) 5);
+            search.setMaxResults((long) 10);
             search.setQ(key);
+
+            LocalDateTime currentDateTime = LocalDateTime.now();
+
+            LocalDateTime oneMonthAgo = currentDateTime.minusMonths(1);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            String oneMonthAgoString = oneMonthAgo.format(formatter);
+            String currentDateTimeString = currentDateTime.format(formatter);
+
+            search.setPublishedAfter(new DateTime(oneMonthAgoString));
+            search.setPublishedBefore(new DateTime(currentDateTimeString));
+
             search.setRelevanceLanguage("en");
             SearchListResponse searchResponse = search.execute();
             List<SearchResult> searchResultList = searchResponse.getItems();
@@ -59,12 +75,12 @@ public class YTService {
                     String title = searchResult.getSnippet().getTitle();
                     System.out.println("title " + title);
 
-                    DateTime myDateTime = new DateTime("2023-04-01T00:00:00.000+03:00");
-                    long value = publishedAt.getValue();
-                    long value1 = myDateTime.getValue();
-                    if (value < value1) {
-                        continue;
-                    }
+//                    DateTime myDateTime = new DateTime("2023-04-01T00:00:00.000+03:00");
+//                    long value = publishedAt.getValue();
+//                    long value1 = myDateTime.getValue();
+//                    if (value < value1) {
+//                        continue;
+//                    }
 
                     VideoListResponse videoResponse = ytApi.getYoutubeService().videos()
                             .list("snippet,contentDetails")
@@ -137,18 +153,18 @@ public class YTService {
 
         int counter = 0;
 
-        do {
+        //do {
             try {
                 CommentThreadListResponse com_thread = ytApi.getYoutubeService().commentThreads().list("snippet")
                         .setVideoId(videoId)
-                        .setPageToken(nextPage_token)
+                        //.setPageToken(nextPage_token)
                         .setOrder("relevance")
                         .setTextFormat("plainText")
-                        .setMaxResults(50L)
+                        .setMaxResults(30L)
                         .setKey(ytApi.getCredentials(user).getYtApiKey())
                         .execute();
 
-                nextPage_token = com_thread.getNextPageToken();
+                //nextPage_token = com_thread.getNextPageToken();
 
                 for (CommentThread commentThread : com_thread.getItems()) {
 
@@ -157,9 +173,9 @@ public class YTService {
                     if (textDisplay.isEmpty() || textDisplay.length() > 300) {
                         continue;
                     }
-                    if (counter >= 10) {
-                        continue;
-                    }
+//                    if (counter >= 3) {
+//                        continue;
+//                    }
 
                     String comId = commentThread.getSnippet().getTopLevelComment().getId();
 
@@ -192,6 +208,6 @@ public class YTService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } while (nextPage_token != null);
+        //} while (nextPage_token != null);
     }
 }

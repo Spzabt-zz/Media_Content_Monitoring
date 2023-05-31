@@ -1,8 +1,10 @@
 package cdu.diploma.mediamonitoring.controller.V1;
 
-import cdu.diploma.mediamonitoring.domain.model.*;
-import cdu.diploma.mediamonitoring.domain.repo.*;
-import cdu.diploma.mediamonitoring.domain.service.AnalysingService;
+import cdu.diploma.mediamonitoring.domain.model.Comparison;
+import cdu.diploma.mediamonitoring.domain.model.Project;
+import cdu.diploma.mediamonitoring.domain.model.User;
+import cdu.diploma.mediamonitoring.domain.repo.ComparisonRepo;
+import cdu.diploma.mediamonitoring.domain.repo.ProjectRepo;
 import cdu.diploma.mediamonitoring.domain.service.ComparisonService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -16,24 +18,12 @@ import java.util.List;
 @Controller
 public class ComparisonController {
     private final ProjectRepo projectRepo;
-    private final RedditDataRepo redditDataRepo;
-    private final TwitterDataRepo twitterDataRepo;
-    private final YTDataRepo ytDataRepo;
     private final ComparisonRepo comparisonRepo;
-    private final AnalysingService analysingService;
-    private final AnalyseDataRepo analyseDataRepo;
-    private final SocialMediaPlatformRepo socialMediaPlatformRepo;
     private final ComparisonService comparisonService;
 
-    public ComparisonController(ProjectRepo projectRepo, RedditDataRepo redditDataRepo, TwitterDataRepo twitterDataRepo, YTDataRepo ytDataRepo, ComparisonRepo comparisonRepo, AnalysingService analysingService, AnalyseDataRepo analyseDataRepo, SocialMediaPlatformRepo socialMediaPlatformRepo, ComparisonService comparisonService) {
+    public ComparisonController(ProjectRepo projectRepo, ComparisonRepo comparisonRepo, ComparisonService comparisonService) {
         this.projectRepo = projectRepo;
-        this.redditDataRepo = redditDataRepo;
-        this.twitterDataRepo = twitterDataRepo;
-        this.ytDataRepo = ytDataRepo;
         this.comparisonRepo = comparisonRepo;
-        this.analysingService = analysingService;
-        this.analyseDataRepo = analyseDataRepo;
-        this.socialMediaPlatformRepo = socialMediaPlatformRepo;
         this.comparisonService = comparisonService;
     }
 
@@ -44,7 +34,6 @@ public class ComparisonController {
 
         Project project = projectRepo.findProjectById(longProjId);
         List<Project> projectsByUser = projectRepo.findAllByUser(user);
-        //SocialMediaPlatform socialMediaPlatform = project.getSocialMediaPlatform();
 
         model.addAttribute("project", project);
         List<Comparison> comparisons = comparisonService.getComparisons(user, model);
@@ -66,7 +55,6 @@ public class ComparisonController {
         Project projectById = projectRepo.findProjectById(longProjId);
         List<Project> projectsByUser = projectRepo.findAllByUser(user);
 
-        //List<Comparison> comparisons = comparisonRepo.findAllByUser(user);
         Comparison comparison = new Comparison();
 
         comparison.setProject(projectById);
