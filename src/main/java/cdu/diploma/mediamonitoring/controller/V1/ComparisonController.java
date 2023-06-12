@@ -45,8 +45,6 @@ public class ComparisonController {
         return "comparing";
     }
 
-
-
     @PostMapping("/panel/compare/{projectId}")
     public String addToComparingProjects(@PathVariable String projectId, @AuthenticationPrincipal User user, Model model) {
         projectId = projectId.replace(",", "");
@@ -67,7 +65,7 @@ public class ComparisonController {
     }
 
     @PostMapping("/comparison-delete/{projectId}")
-    public String deleteProductComparison(@AuthenticationPrincipal User user, @PathVariable String projectId) {
+    public String deleteProjectComparison(@AuthenticationPrincipal User user, @PathVariable String projectId) {
         projectId = projectId.replace(",", "");
         long longProjId = Long.parseLong(projectId);
 
