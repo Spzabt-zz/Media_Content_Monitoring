@@ -37,7 +37,7 @@ public class TwitterService {
                 Query query = Query.of(key)
                         .resultType(Query.ResultType.mixed)
                         .lang("en")
-                        .since("2023-04-01")
+                        .since("2023-06-15")
                         .count(100);
 
                 Twitter twitter = twitterApi.getTwitterBuilder(user);

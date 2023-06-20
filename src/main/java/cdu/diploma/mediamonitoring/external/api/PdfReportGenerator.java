@@ -1,4 +1,4 @@
-package cdu.diploma.mediamonitoring.data.processing;
+package cdu.diploma.mediamonitoring.external.api;
 
 import cdu.diploma.mediamonitoring.util.FreeMarkerUtil;
 import com.lowagie.text.DocumentException;

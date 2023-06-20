@@ -67,8 +67,8 @@ public class RedditService {
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, 2023);
-        cal.set(Calendar.MONTH, Calendar.APRIL);
-        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(Calendar.MONTH, Calendar.MAY);
+        cal.set(Calendar.DAY_OF_MONTH, 25);
         Date myDate = cal.getTime();
 
         ApiCredentials apiCredentials = apiCredentialsRepo.findApiCredentialsByUserId(user.getId());

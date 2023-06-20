@@ -1,6 +1,6 @@
 package cdu.diploma.mediamonitoring.domain.service;
 
-import cdu.diploma.mediamonitoring.data.processing.PdfReportGenerator;
+import cdu.diploma.mediamonitoring.external.api.PdfReportGenerator;
 import cdu.diploma.mediamonitoring.domain.dto.AllDataDto;
 import cdu.diploma.mediamonitoring.domain.model.PlatformName;
 import cdu.diploma.mediamonitoring.domain.model.Project;
