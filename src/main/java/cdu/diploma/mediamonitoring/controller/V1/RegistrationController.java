@@ -109,13 +109,13 @@ public class RegistrationController {
             @RequestParam("twitterAccessToken") String twitterAccessToken,
             @RequestParam("twitterAccessTokenSecret") String twitterAccessTokenSecret,
             @RequestParam("ytApiKey") String ytApiKey,
-            @RequestParam("redditUsername") String redditUsername,
+            /*@RequestParam("redditUsername") String redditUsername,
             @RequestParam("redditPassword") String redditPassword,
-            @RequestParam("redditUserAgent") String redditUserAgent,
+            @RequestParam("redditUserAgent") String redditUserAgent,*/
             Model model) {
         if (redditClient.isEmpty() || redditClientSecret.isEmpty() || twitterConsumerKey.isEmpty()
         ||twitterConsumerSecret.isEmpty() || twitterAccessToken.isEmpty() || twitterAccessTokenSecret.isEmpty()
-                || ytApiKey.isEmpty() || redditUsername.isEmpty() || redditPassword.isEmpty() || redditUserAgent.isEmpty()) {
+                || ytApiKey.isEmpty() /*|| redditUsername.isEmpty() || redditPassword.isEmpty() || redditUserAgent.isEmpty()*/) {
             model.addAttribute("messageType", "danger");
             model.addAttribute("message", "Fields can't be blank.");
             return "addCredentials";
@@ -125,9 +125,12 @@ public class RegistrationController {
 
         apiCredentials.setRedditClientId(redditClient);
         apiCredentials.setRedditClientSecret(redditClientSecret);
-        apiCredentials.setRedditUsername(redditUsername);
-        apiCredentials.setRedditPassword(redditPassword);
-        apiCredentials.setRedditUserAgent(redditUserAgent);
+//        apiCredentials.setRedditUsername(redditUsername);
+//        apiCredentials.setRedditPassword(redditPassword);
+//        apiCredentials.setRedditUserAgent(redditUserAgent);
+        apiCredentials.setRedditUsername("Spzabt_zz");
+        apiCredentials.setRedditPassword("kLg84146ivW#?");
+        apiCredentials.setRedditUserAgent("Praw1 by u/Spzabt_zz");
 
         apiCredentials.setTwitterConsumerKey(twitterConsumerKey);
         apiCredentials.setTwitterConsumerSecret(twitterConsumerSecret);

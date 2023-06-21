@@ -6,6 +6,8 @@
             <#assign counter = 1>
             <#list projects as prj>
                 <div class="card">
+                    <div class="card-body">
+                    <h5 class="card-title">${prj.project.keywords}</h5>
                     <div class="chart-container">
                         <canvas id="sentimentPie${counter}" width="200" height="200"></canvas>
                         <canvas id="sentimentChart${counter}" width="600" height="200"></canvas>
@@ -38,7 +40,7 @@
                     </script>
 
                     <div id="word-cloud${counter}"></div>
-
+                    </div>
                     <div class="card-footer text-muted container">
                         <form action="/comparison-delete/${prj.project.id}" method="post">
                             <input type="hidden" name="_csrf" value="${_csrf.token}"/>
