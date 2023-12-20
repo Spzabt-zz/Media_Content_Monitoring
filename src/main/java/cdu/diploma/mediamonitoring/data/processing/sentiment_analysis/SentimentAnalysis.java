@@ -59,9 +59,9 @@ public class SentimentAnalysis {
 
         List<Future<?>> futures = new ArrayList<>();
 
-        ExecutorService twitterExecutor = Executors.newFixedThreadPool(5);
-        ExecutorService redditExecutor = Executors.newFixedThreadPool(5);
-        ExecutorService youtubeExecutor = Executors.newFixedThreadPool(5);
+        ExecutorService twitterExecutor = Executors.newFixedThreadPool(2);
+        ExecutorService redditExecutor = Executors.newFixedThreadPool(2);
+        ExecutorService youtubeExecutor = Executors.newFixedThreadPool(4);
 
         if (Objects.equals(source, PlatformName.TWITTER.name())) {
             twitterSentimentAnalyser(model, socialMediaPlatform, isAnalysedTwitter, updatedTwitterData, futures, twitterExecutor);

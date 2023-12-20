@@ -160,7 +160,7 @@ public class YTService {
                         //.setPageToken(nextPage_token)
                         .setOrder("relevance")
                         .setTextFormat("plainText")
-                        .setMaxResults(20L)
+                        .setMaxResults(5L)
                         .setKey(ytApi.getCredentials(user).getYtApiKey())
                         .execute();
 
